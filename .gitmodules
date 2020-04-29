@@ -1,0 +1,6 @@
+[submodule "switter-front"]
+	path = src/switter-front
+	url = https://github.com/theamazingeagle/switter-front
+[submodule "switter-back"]
+	path = src/switter-back
+	url = https://github.com/theamazingeagle/switter-back
