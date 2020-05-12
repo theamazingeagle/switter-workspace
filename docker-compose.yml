@@ -26,7 +26,10 @@ services:
         - 8181:8080
     switter-back:
       container_name: switter-back
-      build: ./switter-back/
+      #build: ./switter-back/
+      build: 
+        context: ./
+        dockerfile: ./switter-back/Dockerfile
       ports:
         - 8192:8080
     db:
@@ -36,9 +39,10 @@ services:
       ports:
         - 5432:5432
       volumes:
+        - pg12-data:/var/lib/postgresql/
         #- type: bind
         ##  source: ./postgres/data/
         #  target: /var/lib/postgresql/pgdata:z
-        - "./postgres/data:/var/lib/postgresql/"
-#volumes:
-#  "pg_data":
+        #- "./postgres/data/:/var/lib/postgresql/"
+volumes:
+  "pg12-data":
