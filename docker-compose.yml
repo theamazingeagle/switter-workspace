@@ -1,4 +1,11 @@
 version: "3.7"
+volumes:
+  "pg12-data":
+#networks:
+#  postgres-network:
+#    driver: bridge
+#  service-network:
+#    driver: bridge
 services:
     #ftp-docker:
     #  build: ftp-docker/
@@ -12,27 +19,41 @@ services:
         dockerfile: Dockerfile-dev
       ports:
         - 80:80
-      #links:
-      #  - switter-front
-      #  - switter-back
+      volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./nginx/etc/nginx/nginx-dev.conf:/etc/nginx/nginx.conf
+      #networks:
+      #  - service-network
+      environment:
+        - NGINX_HOST=switter.dev
+      links:
+        - switter-front
+        - switter-back
     switter-front:
       container_name: switter-front
       build:
         context: ./switter-front/
-        dockerfile: Dockerfile-dev
+        dockerfile: Dockerfile-dev-new
       volumes:
-      - "./src/switter-front/:/var/www/switter-front/"
+      #- "./src/switter-front/:/var/www/switter-front/"
+      - "./switter-front/src/switter-front/src:/var/www/switter-front/src"
       ports:
         - 8181:8080
+      #networks:
+      #  - service-network
     switter-back:
       container_name: switter-back
       #build: ./switter-back/
       build: 
-        context: ./
-        dockerfile: ./switter-back/Dockerfile
+        context: ./switter-back/
+        #dockerfile: ./switter-back/Dockerfile
+        dockerfile: ./Dockerfile
       ports:
         - 8192:8080
-    db:
+      #networks:
+      #  - service-network
+      #  - postgres-network
+    postgres:
       container_name: postgres
       build: ./postgres/
       #image: postgres
@@ -44,5 +65,5 @@ services:
         ##  source: ./postgres/data/
         #  target: /var/lib/postgresql/pgdata:z
         #- "./postgres/data/:/var/lib/postgresql/"
-volumes:
-  "pg12-data":
+      #networks:
+      #  - postgres-network

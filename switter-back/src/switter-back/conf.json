@@ -1,0 +1,12 @@
+{
+    "host":"switter-back",
+    "port":8080,
+    "sql":{
+    	"dbname":"switter",
+    	"hostname":"postgres",
+        "drivername":"postgres",
+        "username":"postgres",
+        "password":"password",
+        "port":5432
+    }
+}
