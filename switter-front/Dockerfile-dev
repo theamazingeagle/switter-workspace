@@ -1,0 +1,22 @@
+FROM node:latest
+#FROM debian:latest
+#RUN mkdir -p  /var/www/switter-front/
+WORKDIR /var/www/switter-front/
+#RUN apt-get update && apt-get install -y sudo curl nginx nodejs 
+#RUN curl -L https://npmjs.org/install.sh |  sh
+EXPOSE 8080
+#RUN npm i -g webpack
+#RUN npm init
+#RUN npm cache verify
+#RUN ls .
+#RUN npm install .
+#RUN npm install  @vue/cli @vue/cli-service 
+#CMD ["npm", "cache", "verify" ]
+#CMD ["npm", "install" ]
+#CMD ["npm", "install", "@vue/cli", "@vue/cli-service" ]
+#ENTRYPOINT ["docker-entrypoint.sh"]
+#CMD ["npm", "run", "serve"]
+COPY docker-entrypoint.sh /usr/bin/
+RUN ln -s /usr/bin/docker-entrypoint.sh / # backwards compat
+RUN chmod a+x /usr/bin/docker-entrypoint.sh
+CMD ["/usr/bin/docker-entrypoint.sh"]
