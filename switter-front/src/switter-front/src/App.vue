@@ -9,27 +9,20 @@ export default {
   name: 'App',
   data(){
     return{ 
-      appmessage: "huu",
     }
   },
   props:{
-    //appmessage:String,
   },
   components: {
-    //Login,
-    //Register,
-    //MainPage,
   },
   computed:{
-    selectComponent: function(){return "";}
+    
   },
   created () {
       this.$vuetify.theme.dark = true
   },
   mounted() {
-    this.$axios
-      .get('http://172.18.0.1/api/getmessages')
-      .then(response => (this.appmessage = response.data));
+    
   },
 }
 

@@ -1,12 +1,13 @@
 package configuration
 
 import (
-	"github.com/theamazingeagle/switter-back/types"
 	"encoding/json"
 	"io/ioutil"
 	"log"
 	"os"
+	"switter-back/types"
 )
+
 /*
 type sqlConfiguration struct {
 	Drivername string `json:"drivername"`
@@ -33,7 +34,7 @@ func LoadConfig() {
 		log.Println("config.LoadConfig #1, getting working directory error: ", err)
 	}
 	// open file
-	jsonFile, err := os.Open(workDir+"/conf.json")
+	jsonFile, err := os.Open(workDir + "/conf.json")
 	//jsonFile, err := os.Open(homeDir + "conf.json")
 	//log.Println("	path: ", homeDir + "conf.json")
 	if err != nil {

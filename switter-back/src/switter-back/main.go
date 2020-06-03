@@ -2,12 +2,14 @@ package main
 
 import (
 	//sqlpower "github.com/theamazingeagle/switter-back/sql"
-	"github.com/theamazingeagle/switter-back/configuration"
-	"github.com/theamazingeagle/switter-back/router"
-	"github.com/theamazingeagle/switter-back/sql"
+	"switter-back/configuration"
+	"switter-back/router"
+	"switter-back/sql"
+
 	//
 	"log"
 )
+
 func main() {
 	// config loadin ...
 	configuration.LoadConfig()
