@@ -1,24 +1,22 @@
 package router
-import(
-	"net/http"
+
+import (
 	"log"
+	"net/http"
 	//"strconv"
-	
 )
 
-func Start(host string, port int){
+// Start() - init and start serving requests
+func Start(host string, port int) {
+	mux := http.NewServeMux()
 
-	http.HandleFunc("/api/getmessages", GetMessageList)
-	//http.HandleFunc("/api/", )
-	//http.HandleFunc("/api/", )
-	//http.HandleFunc("/api/", )
-	//http.HandleFunc("/api/", )
-	//http.HandleFunc("/api/", )
-	//http.HandleFunc("/api/", )
-	//http.HandleFunc("/api/", )
-	//http.HandleFunc("/api/", )
-		
+	mux.HandleFunc("/api/getmessages", GetMessageList)
+	//mux.HandleFunc("/api/", )
+	mux.HandleFunc("/api/login", Login)
+	//mux.HandleFunc("/api/refreshtoken", )
+
+	requestHandler := accessMiddleWare(mux)
 
 	//log.Fatal(http.ListenAndServe(host+":"+strconv.Itoa(port), nil))
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":8080", requestHandler))
 }

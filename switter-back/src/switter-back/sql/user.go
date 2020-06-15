@@ -11,7 +11,7 @@ func CreateUser(userName, password, email string) {
 		log.Println("sql.CreateUser err: ", err)
 	}
 }
-func GetUser(ID int64) {
+func GetUser(ID int64) *types.User {
 	row := dbConn.QueryRow("SELECT * FROM users WHERE user_id=$1", ID)
 	if row == nil {
 		log.Println("sql.GetUser err: ", row)
@@ -19,7 +19,20 @@ func GetUser(ID int64) {
 	user := &types.User{}
 	row.Scan(&user.ID, &user.UserName, &user.Password, &user.Email)
 	log.Println("sql.GetUser result: ", user)
+	return user
 }
+
+func GetUserByEmail(email string) *types.User {
+	row := dbConn.QueryRow("SELECT * FROM users WHERE user_email=$1", email)
+	if row == nil {
+		log.Println("sql.GetUserByEmail err: ", row)
+	}
+	user := &types.User{}
+	row.Scan(&user.ID, &user.UserName, &user.Password, &user.Email)
+	log.Println("sql.GetUserByEmail result: ", user)
+	return user
+}
+
 func UpdateUserName(ID int64, newName string) {
 	_, err := dbConn.Exec("UPDATE users SET user_name = $1 WHERE user_id = $2", newName, ID)
 	if err != nil {
