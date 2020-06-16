@@ -4,7 +4,7 @@
     <form>
         <input type="text" v-bind="email">
         <input type="password" v-bind="password">
-        <button/>
+        <button v-on:click="login"/>
     </form>
 
   </div>
@@ -13,6 +13,16 @@
 <script>
   export default {
     name: 'login',
+    methods: {
+      login:function(event){
+        postBody: {   // пример данных для отправки(позже они преобразуются в json)
+        bEmail : email,
+        bPassword : password
+        };
+        this.$axios
+          .post('http://172.18.0.1/api/login', JSON.stringify(postBody));
+      };
+    },
     props: {
         email: String,
         password: String
