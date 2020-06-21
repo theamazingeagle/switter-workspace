@@ -33,7 +33,8 @@ func GetUserByEmail(email string) *types.User {
 		return nil
 	}
 	user := &types.User{}
-	err := row.Scan(&user.ID, &user.UserName, &user.Password, &user.Email)
+	// user_id | user_name | user_email | user_password
+	err := row.Scan(&user.ID, &user.UserName, &user.Email, &user.Password)
 	if err != nil {
 		log.Println("sql.GetUserByEmail error, no row: ", err)
 		return nil
