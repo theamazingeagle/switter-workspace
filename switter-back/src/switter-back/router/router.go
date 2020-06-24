@@ -135,7 +135,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 					w.WriteHeader(http.StatusOK)
-					w.Write([]byte(body))
+					w.Write(body)
 				} else {
 					w.WriteHeader(http.StatusBadRequest)
 					w.Write([]byte("invalid auth data :)"))
@@ -168,14 +168,15 @@ func Register(w http.ResponseWriter, r *http.Request) {
 					w.Write([]byte("internal error"))
 				} else {
 					//send accessToken
-					accessKey, err := generateAccessTokenString(email, password, signingKey)
-					if err != nil {
-						w.WriteHeader(http.StatusInternalServerError)
-						w.Write([]byte("generate access token error"))
-					} else {
-						w.WriteHeader(http.StatusOK)
-						w.Write([]byte(accessKey))
-					}
+					// accessKey, err := generateAccessTokenString(email, password, signingKey)
+					// if err != nil {
+					// 	w.WriteHeader(http.StatusInternalServerError)
+					// 	w.Write([]byte("generate access token error"))
+					// } else {
+					w.WriteHeader(http.StatusOK)
+					//w.Write([]byte(accessKey))
+					w.Write([]byte("User succefully registered"))
+					//}
 				}
 			} else {
 				w.WriteHeader(http.StatusInternalServerError)
