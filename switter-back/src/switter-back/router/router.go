@@ -12,6 +12,7 @@ import (
 	//"strconv"
 	/* ------ */
 	sql "switter-back/sql"
+	"switter-back/types"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -121,8 +122,20 @@ func Login(w http.ResponseWriter, r *http.Request) {
 						w.Write([]byte("internal error"))
 						return
 					}
+					authInfo := types.AuthInfo{
+						JWT:       accessKey,
+						UserID:    user.ID,
+						UserName:  user.UserName,
+						UserEmail: user.Email,
+					}
+
+					body, err := json.Marshal(authInfo)
+					if err != nil {
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+						return
+					}
 					w.WriteHeader(http.StatusOK)
-					w.Write([]byte(accessKey))
+					w.Write([]byte(body))
 				} else {
 					w.WriteHeader(http.StatusBadRequest)
 					w.Write([]byte("invalid auth data :)"))
