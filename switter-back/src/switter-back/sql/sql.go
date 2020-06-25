@@ -31,7 +31,8 @@ func CloseConn() {
 func GetMessages() []types.MessageInfo {
 	rows, err := dbConn.Query(`select m.message_id,m.message_text, m.message_date, u.user_name
 							from messages m
-							inner join users u on u.user_id=m.message_userid;`)
+							inner join users u on u.user_id=m.message_userid
+							order by m.message_date desc ;`)
 	if err != nil {
 		log.Println("sql.GetMessages err: ", err)
 	}

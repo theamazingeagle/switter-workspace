@@ -27,3 +27,7 @@ type AuthInfo struct {
 	UserName  string `json:"Username"`
 	UserEmail string `json:"UserEmail"`
 }
+type NewMessage struct {
+	Text   string `json:"Text"`
+	UserID int    `json:"UserID"`
+}

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -192,15 +191,24 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 //
 func CreateMessage(w http.ResponseWriter, r *http.Request) {
-	log.Println("~router.CreateMessage: ")
-	err := r.ParseForm()
+	//log.Println("~router.CreateMessage: ")
+	//err := r.ParseForm()
+	decoder := json.NewDecoder(r.Body)
+	message := &types.NewMessage{}
+	err := decoder.Decode(message)
+	// ------
 	if err != nil {
+		log.Println("router.CreateMessage error: ", err)
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("data parsing error"))
+		w.Write([]byte("data parsing error,"))
 		return
+		/* --------------------------------------------- */
 	} else {
-		userID, _ := strconv.Atoi(strings.TrimSpace(r.FormValue("userID")))
-		text := r.FormValue("messageText")
+		//userID, _ := strconv.Atoi(strings.TrimSpace(r.FormValue("userID")))
+		//text := r.FormValue("messageText")
+		userID := message.UserID
+		text := message.Text
+
 		log.Println("~router.CreateMessage: ", userID, text)
 		if userID != 0 && len(text) > 0 {
 			err = sql.CreateMessage(text, userID)
