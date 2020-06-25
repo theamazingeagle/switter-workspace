@@ -5,13 +5,19 @@
       <v-toolbar-title>
           <v-img src='../assets/switter-logo.png' height="48px" width="144px">
           </v-img>
+          
       </v-toolbar-title>
-      <v-spacer></v-spacer>    
+      <v-spacer>
+        <v-btn color="green" id="new-message" v-on:click="newMessageDialog=true">New Message</v-btn>
+      </v-spacer>
+      <v-btn color="gray" id="logout" v-on:click="Logout">Logout</v-btn>
   </v-app-bar>
 <!-- ------------------------------- -->
+
   <v-card height="48"></v-card>
   <div class="content-center"> 
   <!-- side navigation menu---------------------------------------- -->
+  <!--
       <v-card class="d-flex pa-2" height="415" >  
         <v-card
           height="400"
@@ -61,6 +67,7 @@
         </v-card>
       
       </v-card>
+      -->
       <!-- message list---------------------------------------- -->
       <v-card class="d-flex pa-2">
         <v-card >
@@ -71,14 +78,15 @@
             min-height="160"
             outlined
             v-for="message in appmessage" :key="message.ID">
-              <v-card-title>Author</v-card-title>
-              <v-card-text >{{message.Text}}</v-card-text>
-              <v-card-actions>comment out</v-card-actions>
-              
+              <div>
+                <div class="overline mb-4">{{message.Username}} posted at: {{message.Date }}</div>
+                <v-list-item-title class="headline mb-1">{{message.Text}}</v-list-item-title>
+              </div>
           </v-card>
         </v-card >
       </v-card>
       <!-- right panel---------------------------------------- -->
+      <!--
       <v-card class="d-flex pa-2" height="415" >
         <v-app-bar
           height="400"
@@ -86,10 +94,33 @@
         >
         </v-app-bar>
       </v-card>
+      -->
+      
   <!----------------------------------------------- -->
   </div>
   <!-- end ---------------------------------------- -->
+  <v-dialog 
+    name ="create-message-modal" 
+    v-model="newMessageDialog"
+    max-width=50%
+  >
+    <v-card class="modal"> 
+      <div class="overline mb-4">type your literals</div> 
+      <v-textarea
+        v-model = "newMessageBody"
+        autofocus="true"
+        full-width="true"
+        flat="true"
+        dark 
+        outlined="true"
+      >
+      </v-textarea>
+      <!-- <div class="overline mb-4" v-if="creatingerror" >error while posting...</div> -->
+      <v-btn v-on:click="CreateMessage">Create</v-btn>
+    </v-card>
+  </v-dialog>
 </div>
+
 </template>
 
 <script>
@@ -97,7 +128,10 @@ export default {
   name: 'appview',
   data(){
     return{ 
-      appmessage: "huu",
+      appmessage: "",
+      newMessageDialog: false,
+      newMessageBody:"",
+      creatingerror: false,
     }
   },
   props:{
@@ -115,10 +149,45 @@ export default {
       this.$vuetify.theme.dark = true
   },
   mounted() {
-    this.$axios
-      .get('http://172.18.0.1/api/getmessages')
-      .then(response => (this.appmessage = response.data));
+   
+    this.getMessages();
   },
+  methods:{
+    getMessages:function(){
+      this.$axios
+        .get('http://172.18.0.1/api/getmessages', 
+              {headers:{"Authorization":"Bearer "+localStorage.getItem("switterJWT")
+            }})
+        .then(response => (this.appmessage = response.data));
+    },
+    CreateMessageModal:function(){
+      console.log("CreateMessageModal()");
+      this.$modal.show('create-message-modal');
+    },
+    CreateMessage:function(){
+      let messageData = new Object();
+      messageData.Text = this.newMessageBody;
+      messageData.UserID = parseInt(localStorage.getItem("switterUserID") );
+      
+      this.$axios
+        .post( 'http://172.18.0.1/api/createmessage',
+        messageData,
+        {headers:{"Authorization":"Bearer "+localStorage.getItem("switterJWT")  }}
+        ).then(response => {
+          if(response.status == 200){
+            this.newMessageDialog = false;
+            this.newMessageBody = "";
+            this.getMessages();
+          } else {
+            this.creatingerror = true;
+          }
+        });
+    },
+    Logout:function(){
+      localStorage.removeItem("switterJWT");
+      this.$router.push({name:'login'});
+    }
+  }
 }
 
 </script>
@@ -137,5 +206,8 @@ export default {
 
   .small-container {
     max-width: 680px;
+  }
+  .modal{
+    
   }
 </style>

@@ -1,12 +1,27 @@
 <template>
   <div id="login">
-    <h2>Login to SWITTER </h2>
-    <form>
-        <input type="text" v-bind="email">
-        <input type="password" v-bind="password">
-        <button v-on:click="login"/>
-    </form>
-
+    <div class="center">
+      <v-img src='../assets/switter-logo.png'  ></v-img>
+      
+      <!-- <h2 class="header">Login to SWITTER </h2> -->
+      <v-form class="form">
+        <v-row >
+          <v-text-field required type="text"  v-model="email" label="E-mail"></v-text-field>
+        </v-row>
+        <v-row >
+          <v-text-field  required type="password" v-model="password" label="Password"></v-text-field>
+        </v-row>
+        <v-row>
+          <v-btn class="btn-login" v-on:click="login">Sign In</v-btn>
+        </v-row>
+        <v-row class="to-register">
+          
+          <router-link class="nav-link-register" to="/register">No Account? Sign Up Right Now!</router-link>
+          
+        </v-row>
+      </v-form>
+    </div>
+    
   </div>
 </template>
 
@@ -14,20 +29,64 @@
   export default {
     name: 'login',
     methods: {
-      login:function(event){
-        postBody: {   // пример данных для отправки(позже они преобразуются в json)
-        bEmail : email,
-        bPassword : password
-        };
+      login:function(){
+        let postBody = new URLSearchParams(); 
+        postBody.append("userEmail", this.email)
+        postBody.append("userPassword", this.password);
+        
         this.$axios
-          .post('http://172.18.0.1/api/login', JSON.stringify(postBody));
-      };
+          .post(
+            'http://172.18.0.1/api/login', 
+            postBody,
+            {headers:{'Content-Type':'application/x-www-form-urlencoded'}}
+          ).then(response=>{
+            if( response.data != null){
+              if( response.status == 200){
+                localStorage.setItem("switterJWT",  response.data.JWT);
+                localStorage.setItem("switterUserID",  response.data.UserID);
+                localStorage.setItem("switterUserName",  response.data.UserName);
+                localStorage.setItem("switterUserEmail",  response.data.UserEmail);
+                this.$router.push({name:'appview'});
+              } else {
+                this.$router.push({name:'register'});
+              }
+
+            }
+          });
+      },
     },
-    props: {
-        email: String,
-        password: String
+    data: function() {
+      return {
+          email: '',
+          password: '',
+      }
     },
   }
 </script>
 
-<style scoped></style>
+<style scoped>
+#login{
+  
+  align-content: center;
+    
+}
+.header{
+  text-align: center;
+}
+.center{
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width:20%;
+}
+.btn-login{
+  width: 100%;
+}
+.to-register{
+  margin-left: auto;
+  margin-right: auto;
+}
+.nav-link-register{
+  text-decoration-line: none;
+}
+</style>

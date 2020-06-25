@@ -1,3 +1,4 @@
+
 import Vue from 'vue'
 import App from '@/App.vue'
 /**/
@@ -16,12 +17,24 @@ import Register from '@/components/Register.vue'
 import AppView from '@/components/AppView.vue'
 /**/
 import '@/plugins/axios'
+import '@/plugins/router'
 import vuetify from '@/plugins/vuetify';
 /**/
 Vue.config.productionTip = false
-
-
-const router = new Router({
+/**/
+import VModal from 'vue-js-modal'
+Vue.use(VModal)
+/**/
+//--- Auth Hook -------------
+// const ifNotAuthenticated = (to, from, next) => {
+//   if (localStorage.getItem("switterJWT") !=="") {
+//     next()
+//     return
+//   }
+//   next('/login')
+// }
+//---------------------------
+let router = new Router({
   routes: [
     {
       path: '/login',
@@ -34,12 +47,34 @@ const router = new Router({
       component: Register,
     },
     {
-      path: '/appview',
+      path: '/',
       name:'appview',
       component: AppView,
+      meta: { 
+        requiresAuth: true
+      },
+      //beforeEnter: ifNotAuthenticated
     },
   ]
- })
+ });
+
+router.beforeEach((to, from, next) => {
+  if(to.matched.some(record => record.meta.requiresAuth)) {
+    if (localStorage.getItem("switterJWT") === null ) {
+        //console.log("here1");
+        next({ path: '/login' });
+        return;
+    } else {
+        next(); 
+        //console.log("here2");
+        return;
+      } 
+  } else {
+    next(); 
+    //console.log("here3");
+    return;
+  }    
+});
 
 new Vue({
   el:"#app",
@@ -47,4 +82,4 @@ new Vue({
   vuetify,
   axios,
   router,
-}).$mount('#app')
+}).$mount('#app');
