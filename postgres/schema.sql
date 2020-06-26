@@ -17,3 +17,4 @@ CREATE TABLE messages(
 
 ALTER TABLE messages ADD FOREIGN KEY (message_userid) REFERENCES users(user_id);
 --alter table messages drop column message_rootid;--
+ALTER TABLE messages ALTER COLUMN message_date SET DEFAULT Now();

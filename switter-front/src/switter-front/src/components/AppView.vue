@@ -154,8 +154,9 @@ export default {
   },
   methods:{
     getMessages:function(){
+      console.log("RARARARARARARARARARA HSOTNAEM:", this.$hostname);
       this.$axios
-        .get('http://172.18.0.1/api/getmessages', 
+        .get(this.$hostname + '/api/getmessages', 
               {headers:{"Authorization":"Bearer "+localStorage.getItem("switterJWT")
             }})
         .then(response => (this.appmessage = response.data));
@@ -170,7 +171,7 @@ export default {
       messageData.UserID = parseInt(localStorage.getItem("switterUserID") );
       
       this.$axios
-        .post( 'http://172.18.0.1/api/createmessage',
+        .post( this.$hostname + '/api/createmessage',
         messageData,
         {headers:{"Authorization":"Bearer "+localStorage.getItem("switterJWT")  }}
         ).then(response => {

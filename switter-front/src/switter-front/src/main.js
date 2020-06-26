@@ -1,4 +1,6 @@
+import HOST_NAME from '@/conf.js'
 
+/**/
 import Vue from 'vue'
 import App from '@/App.vue'
 /**/
@@ -22,8 +24,8 @@ import vuetify from '@/plugins/vuetify';
 /**/
 Vue.config.productionTip = false
 /**/
-import VModal from 'vue-js-modal'
-Vue.use(VModal)
+
+Vue.prototype.$hostname = HOST_NAME
 /**/
 //--- Auth Hook -------------
 // const ifNotAuthenticated = (to, from, next) => {

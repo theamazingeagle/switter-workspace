@@ -31,7 +31,7 @@
         
         this.$axios
           .post(
-            'http://172.18.0.1/api/register', 
+            this.$hostname + '/api/register', 
             postBody,
             {headers:{'Content-Type':'application/x-www-form-urlencoded'}}
           ).then(response=>{
