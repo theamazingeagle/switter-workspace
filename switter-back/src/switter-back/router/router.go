@@ -199,10 +199,9 @@ func CreateMessage(w http.ResponseWriter, r *http.Request) {
 	// ------
 	if err != nil {
 		log.Println("router.CreateMessage error: ", err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("data parsing error,"))
 		return
-		/* --------------------------------------------- */
 	} else {
 		//userID, _ := strconv.Atoi(strings.TrimSpace(r.FormValue("userID")))
 		//text := r.FormValue("messageText")
@@ -224,7 +223,7 @@ func CreateMessage(w http.ResponseWriter, r *http.Request) {
 			}
 		} else {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("no message data"))
+			w.Write([]byte("incomplete message data"))
 			return
 		}
 	}

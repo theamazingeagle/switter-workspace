@@ -1,4 +1,4 @@
-version: "3.7"
+version: "3.2"
 volumes:
   "pg12-data":
 #networks:
@@ -23,7 +23,7 @@ services:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       #- ./nginx.conf:/etc/nginx/nginx.conf
       environment:
-        - NGINX_HOST=switter.dev
+        - NGINX_HOST=switter.pro
       links:
         - switter-back
     switter-back:
