@@ -11,36 +11,34 @@ services:
     #  build: ftp-docker/
     #  ports: 
     #    - 8021:80
-
     nginx:
       container_name: nginx
       build:
-        context: ./nginx/
-        dockerfile: Dockerfile-dev
+        context: ./switter-front-vanilla-spa/
+        dockerfile: ./Dockerfile
       ports:
         - 80:80
       volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./nginx/etc/nginx/nginx-dev.conf:/etc/nginx/nginx.conf
+      - "./switter-front-vanilla-spa/src:/usr/share/nginx/html"
       #networks:
       #  - service-network
       environment:
-        - NGINX_HOST=switter.dev
+        - NGINX_HOST=switter.pro
       links:
-        - switter-front
         - switter-back
-    switter-front:
-      container_name: switter-front
-      build:
-        context: ./switter-front/
-        dockerfile: Dockerfile-dev-new
-      volumes:
-      #- "./src/switter-front/:/var/www/switter-front/"
-      - "./switter-front/src/switter-front/src:/var/www/switter-front/src"
-      ports:
-        - 8181:8080
-      #networks:
-      #  - service-network
+    #switter-front:
+    #  container_name: switter-front
+    #  build:
+    #    context: ./switter-front/
+    #    dockerfile: Dockerfile-dev-new
+    #  volumes:
+    #  #- "./src/switter-front/:/var/www/switter-front/"
+    #  - "./switter-front/src/switter-front/src:/var/www/switter-front/src"
+    #  ports:
+    #    - 8181:8080
+    #  #networks:
+    #  #  - service-network
     switter-back:
       container_name: switter-back
       #build: ./switter-back/

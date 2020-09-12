@@ -5,7 +5,7 @@ COPY . /app
 #RUN mvn protobuf:compile -DprotocExecutable=/usr/bin/protoc
 RUN mvn package
 #Step #2
-FROM openjdk:7 as 
+FROM openjdk:7
 WORKDIR /app
 COPY --from=build-stage /app/target/dict-1.0-SNAPSHOT.jar  /app
 #RUN java -jar /app/dict-1.0-SNAPSHOT.jar

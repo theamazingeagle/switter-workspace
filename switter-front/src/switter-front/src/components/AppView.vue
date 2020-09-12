@@ -193,7 +193,7 @@ export default {
 
 </script>
 
-<style>
+<style scoped>
   .content-center {
     color:#ffffff;
     display: flex;

@@ -2,8 +2,8 @@ module.exports = {
   "transpileDependencies": [
     "vuetify"
   ],
-  devServer: {
-    hot: false,
-    liveReload: false
-  }
+  chainWebpack: config => {
+    config.plugins.delete('preload')
+  },
+  
 }

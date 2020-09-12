@@ -7,8 +7,8 @@ import App from '@/App.vue'
 import Router from 'vue-router'
 Vue.use(Router)
 
-import Vuetify from 'vuetify'
-Vue.use(Vuetify)
+//import Vuetify from 'vuetify'
+//Vue.use(Vuetify)
 /**/
 import axios from 'axios'
 //import VueAxios from 'vue-axios'
@@ -36,6 +36,8 @@ Vue.prototype.$hostname = HOST_NAME
 //   next('/login')
 // }
 //---------------------------
+
+
 let router = new Router({
   routes: [
     {
@@ -81,7 +83,7 @@ router.beforeEach((to, from, next) => {
 new Vue({
   el:"#app",
   render: h => h(App),
-  vuetify,
   axios,
   router,
+  vuetify,
 }).$mount('#app');

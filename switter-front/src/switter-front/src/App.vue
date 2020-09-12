@@ -20,7 +20,7 @@ export default {
     
   },
   created () {
-      this.$vuetify.theme.dark = true
+      //this.$vuetify.theme.dark = true
   },
   mounted() {
     
@@ -31,7 +31,7 @@ export default {
 
 <style>
   .content-center {
-    color:#ffffff;
+    
     display: flex;
     justify-content: center;
     flex-direction: row;
