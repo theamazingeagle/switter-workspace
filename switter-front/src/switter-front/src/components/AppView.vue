@@ -3,7 +3,7 @@
   <!-- upper bar---------------------------------------- -->
   <v-app-bar color="gray accent-8" dense dark fixed >
       <v-toolbar-title>
-          <v-img src='../assets/switter-logo.png' height="48px" width="144px">
+          <v-img src='assets/switter-logo.png' height="48px" width="144px">
           </v-img>
           
       </v-toolbar-title>
@@ -107,7 +107,8 @@
     <v-card class="modal"> 
       <div class="overline mb-4">type your literals</div> 
       <v-textarea
-        v-model = "newMessageBody"
+        :value="newMessageBody" 
+        @change="newMessageBody = $event"
         autofocus="true"
         full-width="true"
         flat="true"
@@ -162,7 +163,7 @@ export default {
         .then(response => (this.appmessage = response.data));
     },
     CreateMessageModal:function(){
-      console.log("CreateMessageModal()");
+      //console.log("CreateMessageModal()");
       this.$modal.show('create-message-modal');
     },
     CreateMessage:function(){

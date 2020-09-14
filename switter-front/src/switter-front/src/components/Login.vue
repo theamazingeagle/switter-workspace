@@ -1,7 +1,7 @@
 <template>
   <div id="login">
     <div class="center">
-      <v-img src='../assets/switter-logo.png'  ></v-img>
+      <v-img src='assets/switter-logo.png'  ></v-img>
       
       <!-- <h2 class="header">Login to SWITTER </h2> -->
       <v-form class="form">
@@ -88,5 +88,10 @@
 }
 .nav-link-register{
   text-decoration-line: none;
+}
+label.v-label.theme--dark {
+  top: auto;
+  margin-top: 5px;
+  margin-left: 5px;
 }
 </style>

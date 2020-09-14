@@ -16,5 +16,6 @@ RUN npm run build
 FROM nginx:stable-alpine as production-stage
 COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY --from=build-stage /var/www/switter-front/dist /usr/share/nginx/html
+COPY ./src/switter-front/src/assets /usr/share/nginx/html/assets
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

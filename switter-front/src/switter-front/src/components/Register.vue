@@ -1,7 +1,7 @@
 <template>
   <div id="register">
     <div class="center">
-      <v-img src='../assets/switter-logo.png'  ></v-img>
+      <v-img src='assets/switter-logo.png'  ></v-img>
       <!-- <h2 class="header">register to SWITTER </h2> -->
       <v-form class="form">
         <v-row >
