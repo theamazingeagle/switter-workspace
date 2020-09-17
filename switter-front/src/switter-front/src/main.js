@@ -8,7 +8,9 @@ import Router from 'vue-router'
 Vue.use(Router)
 
 //import Vuetify from 'vuetify'
-//Vue.use(Vuetify)
+//import 'vuetify/dist/vuetify.min.css'
+//Vue.use(Vuetify);
+
 /**/
 import axios from 'axios'
 //import VueAxios from 'vue-axios'
