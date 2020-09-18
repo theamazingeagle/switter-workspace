@@ -8,9 +8,9 @@
           
       </v-toolbar-title>
       <v-spacer>
-        <v-btn color="green" id="new-message" v-on:click="newMessageDialog=true">New Message</v-btn>
+        <v-btn color="black" id="new-message" v-on:click="newMessageDialog=true">New Message</v-btn>
       </v-spacer>
-      <v-btn color="gray" id="logout" v-on:click="Logout">Logout</v-btn>
+      <v-btn v-if="accessToken" color="gray" id="logout" v-on:click="Logout">Logout</v-btn>
   </v-app-bar>
 <!-- ------------------------------- -->
 
@@ -104,7 +104,7 @@
     v-model="newMessageDialog"
     max-width=50%
   >
-    <v-card class="modal"> 
+    <v-card v-if="accessToken" class="modal"> 
       <div class="overline mb-4">type your literals</div> 
       <v-textarea
         :value="newMessageBody" 
@@ -118,6 +118,14 @@
       </v-textarea>
       <!-- <div class="overline mb-4" v-if="creatingerror" >error while posting...</div> -->
       <v-btn v-on:click="CreateMessage">Create</v-btn>
+    </v-card>
+    <v-card v-else>
+      <div >
+        Not Authorized,
+        <router-link class="nav-link-register" to="/login"> login</router-link>
+        or
+        <router-link class="nav-link-register" to="/register">register</router-link>
+      </div>
     </v-card>
   </v-dialog>
 </div>
@@ -133,6 +141,7 @@ export default {
       newMessageDialog: false,
       newMessageBody:"",
       creatingerror: false,
+      accessToken: localStorage.getItem('switterJWT'),
     }
   },
   props:{
@@ -155,7 +164,6 @@ export default {
   },
   methods:{
     getMessages:function(){
-      console.log("RARARARARARARARARARA HSOTNAEM:", this.$hostname);
       this.$axios
         .get(this.$hostname + '/api/getmessages', 
               {headers:{"Authorization":"Bearer "+localStorage.getItem("switterJWT")

@@ -56,9 +56,7 @@ let router = new Router({
       path: '/',
       name:'appview',
       component: AppView,
-      meta: { 
-        requiresAuth: true
-      },
+      
       //beforeEnter: ifNotAuthenticated
     },
   ]
