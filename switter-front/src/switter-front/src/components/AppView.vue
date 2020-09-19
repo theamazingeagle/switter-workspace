@@ -8,95 +8,30 @@
           
       </v-toolbar-title>
       <v-spacer>
-        <v-btn color="green" id="new-message" v-on:click="newMessageDialog=true">New Message</v-btn>
+        <v-btn color="black" id="new-message" v-on:click="newMessageDialog=true">New Message</v-btn>
       </v-spacer>
-      <v-btn color="gray" id="logout" v-on:click="Logout">Logout</v-btn>
+      <v-btn v-if="accessToken" color="gray" id="logout" v-on:click="Logout">Logout</v-btn>
   </v-app-bar>
 <!-- ------------------------------- -->
 
   <v-card height="48"></v-card>
   <div class="content-center"> 
-  <!-- side navigation menu---------------------------------------- -->
-  <!--
-      <v-card class="d-flex pa-2" height="415" >  
-        <v-card
-          height="400"
-          width="256"
-        >
-          <v-navigation-drawer permanent>
-            <v-list-item>
-              <v-list-item-content>
-                <v-list-item-title class="title">
-                  Application
-                </v-list-item-title>
-                <v-list-item-subtitle>
-                  subtext
-                </v-list-item-subtitle>
-              </v-list-item-content>
-            </v-list-item>
-
-            <v-divider></v-divider>
-
-            <v-list dense nav>
-              <v-list-item>
-                <v-list-item-content>
-                  <li class="nav-item">
-                    <router-link class="nav-link" to="/home">Home</router-link>
-                  </li>
-                </v-list-item-content>
-              </v-list-item>
-
-              <v-list-item>
-                <v-list-item-content>
-                  <li class="nav-item">
-                    <router-link class="nav-link" to="/home">User</router-link>
-                  </li>
-                </v-list-item-content>
-              </v-list-item>
-
-              <v-list-item>
-                <v-list-item-content>
-                  <li class="nav-item">
-                    <router-link class="nav-link" to="/home">Feed</router-link>
-                  </li>
-                </v-list-item-content>
-              </v-list-item>
-
-            </v-list>
-          </v-navigation-drawer>
-        </v-card>
-      
-      </v-card>
-      -->
-      <!-- message list---------------------------------------- -->
-      <v-card class="d-flex pa-2">
-        <v-card >
-          <v-card  
-            color="gray accent-2"
-            class="mx-auto"
-            min-width="540"
-            min-height="160"
-            outlined
-            v-for="message in appmessage" :key="message.ID">
-              <div>
-                <div class="overline mb-4">{{message.Username}} posted at: {{message.Date }}</div>
-                <v-list-item-title class="headline mb-1">{{message.Text}}</v-list-item-title>
-              </div>
-          </v-card>
-        </v-card >
-      </v-card>
-      <!-- right panel---------------------------------------- -->
-      <!--
-      <v-card class="d-flex pa-2" height="415" >
-        <v-app-bar
-          height="400"
-          width="256"
-        >
-        </v-app-bar>
-      </v-card>
-      -->
-      
-  <!----------------------------------------------- -->
+    <v-card  
+      color="gray accent-2"
+      class="mx-auto msg"
+      min-width="540"
+      min-height="160"
+      outlined
+      v-for="message in appmessage" :key="message.ID">
+        <div message>
+          <div class="msg-title">
+            <img class="avatar" src="../assets/user.png"></img>
+            <div class="msg-username" >{{message.Username}}</div>
+            <div class="msg-date" overline mb-4> {{message.Date }}</div>
+          </div>
+          <div class="msg-content mb-1">{{message.Text}}</div>
+        </div>
+    </v-card> 
   </div>
   <!-- end ---------------------------------------- -->
   <v-dialog 
@@ -104,21 +39,33 @@
     v-model="newMessageDialog"
     max-width=50%
   >
-    <v-card class="modal"> 
-      <div class="overline mb-4">type your literals</div> 
-      <v-textarea
-        :value="newMessageBody" 
-        @change="newMessageBody = $event"
-        autofocus="true"
-        full-width="true"
-        flat="true"
-        dark 
-        outlined="true"
-      >
-      </v-textarea>
-      <!-- <div class="overline mb-4" v-if="creatingerror" >error while posting...</div> -->
-      <v-btn v-on:click="CreateMessage">Create</v-btn>
+    <v-card  class="modal" min-height="160">
+      <div v-if="accessToken"> 
+        <div class="overline mb-4">type your literals</div> 
+        <v-textarea
+          :value="newMessageBody" 
+          @change="newMessageBody = $event"
+          autofocus="true"
+          full-width="true"
+          flat="true"
+          dark 
+          outlined="true"
+        >
+        </v-textarea>
+        <!-- <div class="overline mb-4" v-if="creatingerror" >error while posting...</div> -->
+        <v-btn v-on:click="CreateMessage">Create</v-btn>
+      </div>
+
+      <div v-else class="modal" >
+        <div class="not-authorized">
+          Not Authorized,
+          <router-link class="nav-link-register" to="/login"> login</router-link>
+          or
+          <router-link class="nav-link-register" to="/register">register</router-link>
+        </div>
+      </div >
     </v-card>
+    
   </v-dialog>
 </div>
 
@@ -133,6 +80,7 @@ export default {
       newMessageDialog: false,
       newMessageBody:"",
       creatingerror: false,
+      accessToken: localStorage.getItem('switterJWT'),
     }
   },
   props:{
@@ -155,7 +103,6 @@ export default {
   },
   methods:{
     getMessages:function(){
-      console.log("RARARARARARARARARARA HSOTNAEM:", this.$hostname);
       this.$axios
         .get(this.$hostname + '/api/getmessages', 
               {headers:{"Authorization":"Bearer "+localStorage.getItem("switterJWT")
@@ -199,7 +146,7 @@ export default {
     color:#ffffff;
     display: flex;
     justify-content: center;
-    flex-direction: row;
+    flex-direction: column;
   }
   button {
     background: #009435;
@@ -209,7 +156,48 @@ export default {
   .small-container {
     max-width: 680px;
   }
+  .not-authorized{
+    text-align: center;
+    padding: 40px;
+    font-size: 130%;
+  }
   .modal{
+
+  }
+  .message{
+    display: flex;
+    border: 1px gray;
+  }
+  .msg-title{
+    padding-left: 15px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #4a4140 ;
+    background-color: #363636;
+    height: 24px;
+  }
+  .avatar{
+    border-radius: 50%;
+    height: 16px;
+    margin-left,margin-right: 10px;
+  }
+  .msg-date{
+    font-size: 85%;
+    padding: 5px;
+    color: gray;
+  }
+  .msg-content{
+    display: flex;
+    font-size: 150%;
+    margin: 10px;
     
+  }
+  .msg-username {
+    font-size: 110%;
+    margin: 10px
+  }
+  .msg{
+    margin: 5px;
+    background-color: #240e0b;
   }
 </style>

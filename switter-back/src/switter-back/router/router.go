@@ -22,6 +22,7 @@ var (
 	trustedRoutes = map[string]int{
 		"/api/login":    0,
 		"/api/register": 0,
+		"/api/getmessages": 0,
 	}
 )
 
