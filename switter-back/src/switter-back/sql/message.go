@@ -3,6 +3,7 @@ package sql
 import (
 	"fmt"
 	"log"
+	"strconv"
 
 	"switter-back/types"
 )
@@ -44,11 +45,13 @@ func DeleteMessage(ID int64) {
 }
 
 // GetMessages() returns all messages
-func GetMessages() []types.MessageInfo {
-	rows, err := dbConn.Query(`select m.message_id,m.message_text, to_char(m.message_date, 'DD Mon YYYY HH24:MI'), u.user_name
-							from messages m
-							inner join users u on u.user_id=m.message_userid
-							order by m.message_date desc ;`)
+func GetMessages(page int64) []types.MessageInfo {
+	pageStr := strconv.FormatInt(page, 10)
+	queryStr := `select m.message_id,m.message_text, to_char(m.message_date, 'DD Mon YYYY HH24:MI'), u.user_name
+	from messages m
+	inner join users u on u.user_id=m.message_userid
+	order by m.message_date desc limit 20 offset ` + pageStr + ` ;`
+	rows, err := dbConn.Query(queryStr)
 	if err != nil {
 		log.Println("sql.GetMessages err: ", err)
 	}
