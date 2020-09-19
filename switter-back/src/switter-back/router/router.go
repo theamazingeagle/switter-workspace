@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -79,7 +80,7 @@ func accessMiddleWare(handler http.Handler) http.Handler {
 	log.Println("~router.accessMiddleWare ~~~~~")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		/* some checks? */
-		route := r.URL.RequestURI()
+		route := r.URL.Path
 		_, trustedRoutExist := trustedRoutes[route]
 		if trustedRoutExist {
 			handler.ServeHTTP(w, r)
@@ -232,7 +233,13 @@ func CreateMessage(w http.ResponseWriter, r *http.Request) {
 
 //
 func GetMessageList(w http.ResponseWriter, r *http.Request) {
-	messages := sql.GetMessages()
+	page, err := strconv.ParseInt(r.URL.Query().Get("page"), 10, 64)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("invalid page index"))
+		return
+	}
+	messages := sql.GetMessages(page)
 
 	js, err := json.Marshal(messages)
 	if err != nil {

@@ -1,21 +1,23 @@
 <template>
-  <div id="appview">
+  <div id="appview" >
   <!-- upper bar---------------------------------------- -->
   <v-app-bar color="gray accent-8" dense dark fixed >
       <v-toolbar-title>
-          <v-img src='assets/switter-logo.png' height="48px" width="144px">
-          </v-img>
-          
+          <router-link class="nav-link-register" to="/">
+            <v-img src='assets/switter-logo.png' height="48px" width="144px">
+            </v-img>
+          </router-link>
       </v-toolbar-title>
       <v-spacer>
         <v-btn color="black" id="new-message" v-on:click="newMessageDialog=true">New Message</v-btn>
+        <v-btn color="black" id="loadnew" v-on:click="onScroll">LoadNew</v-btn>
       </v-spacer>
       <v-btn v-if="accessToken" color="gray" id="logout" v-on:click="Logout">Logout</v-btn>
   </v-app-bar>
 <!-- ------------------------------- -->
 
   <v-card height="48"></v-card>
-  <div class="content-center"> 
+  <div class="content-center" @scroll="onScroll"> 
     <v-card  
       color="gray accent-2"
       class="mx-auto msg"
@@ -31,7 +33,8 @@
           </div>
           <div class="msg-content mb-1">{{message.Text}}</div>
         </div>
-    </v-card> 
+    </v-card>
+    <div @scroll="onScroll"></div> 
   </div>
   <!-- end ---------------------------------------- -->
   <v-dialog 
@@ -75,8 +78,9 @@
 export default {
   name: 'appview',
   data(){
-    return{ 
-      appmessage: "",
+    return{
+      msgListPage:0, 
+      appmessage: [],
       newMessageDialog: false,
       newMessageBody:"",
       creatingerror: false,
@@ -95,7 +99,11 @@ export default {
     selectComponent: function(){return "";}
   },
   created () {
-      this.$vuetify.theme.dark = true
+      this.$vuetify.theme.dark = true;
+      window.addEventListener('scroll', this.onScroll);
+  },
+  destroyed () {
+    window.removeEventListener('scroll', this.onScroll);
   },
   mounted() {
    
@@ -104,10 +112,13 @@ export default {
   methods:{
     getMessages:function(){
       this.$axios
-        .get(this.$hostname + '/api/getmessages', 
-              {headers:{"Authorization":"Bearer "+localStorage.getItem("switterJWT")
-            }})
-        .then(response => (this.appmessage = response.data));
+        .get(this.$hostname + '/api/getmessages?page='+this.msgListPage)
+        .then(response => {
+          
+          this.appmessage = this.appmessage.concat(response.data);
+          this.msgListPage = this.appmessage.length;
+          //console.log("###### this.appmessage.length : ", this.appmessage.length);
+        });
     },
     CreateMessageModal:function(){
       //console.log("CreateMessageModal()");
@@ -135,6 +146,17 @@ export default {
     Logout:function(){
       localStorage.removeItem("switterJWT");
       this.$router.push({name:'login'});
+    },
+    onScroll: function () {
+      if( Math.max(window.pageYOffset, document.documentElement.scrollTop, document.body.scrollTop) + window.innerHeight === document.documentElement.offsetHeight ) {
+        this.getMessages();
+      }
+      //console.log("... scroll-scroll-scroll ... ");
+      //console.log("window.pageYOffset : ", window.pageYOffset);
+      //console.log("document.documentElement.offsetHeight : ", document.documentElement.offsetHeight);
+      //console.log("document.documentElement.scrollTop : ", document.documentElement.scrollTop);
+      //console.log("document.body.scrollTop : ", document.body.scrollTop);
+      //console.log("window.innerHeight : ", window.innerHeight);
     }
   }
 }
