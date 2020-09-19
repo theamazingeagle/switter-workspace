@@ -42,3 +42,24 @@ func DeleteMessage(ID int64) {
 		log.Println("sql.DeleteMessage err: ", err)
 	}
 }
+
+// GetMessages() returns all messages
+func GetMessages() []types.MessageInfo {
+	rows, err := dbConn.Query(`select m.message_id,m.message_text, to_char(m.message_date, 'DD Mon YYYY HH24:MI'), u.user_name
+							from messages m
+							inner join users u on u.user_id=m.message_userid
+							order by m.message_date desc ;`)
+	if err != nil {
+		log.Println("sql.GetMessages err: ", err)
+	}
+	//messages := make([]*types.Message,0)
+	messages := []types.MessageInfo{}
+	for rows.Next() {
+		message := &types.MessageInfo{}
+		rows.Scan(&message.MessageID, &message.Text, &message.Date, &message.UserName)
+		log.Println("extracted contains: ", message)
+		messages = append(messages, *message)
+	}
+
+	return messages
+}

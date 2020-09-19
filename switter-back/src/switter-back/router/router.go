@@ -20,8 +20,8 @@ var (
 	expTime       = 3600
 	signingKey    = []byte("mlp976g4bo76t6785gfv56")
 	trustedRoutes = map[string]int{
-		"/api/login":    0,
-		"/api/register": 0,
+		"/api/login":       0,
+		"/api/register":    0,
 		"/api/getmessages": 0,
 	}
 )
@@ -233,6 +233,7 @@ func CreateMessage(w http.ResponseWriter, r *http.Request) {
 //
 func GetMessageList(w http.ResponseWriter, r *http.Request) {
 	messages := sql.GetMessages()
+
 	js, err := json.Marshal(messages)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

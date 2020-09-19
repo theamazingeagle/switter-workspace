@@ -23,9 +23,9 @@
       min-height="160"
       outlined
       v-for="message in appmessage" :key="message.ID">
-        <div message>
+        <div >
           <div class="msg-title">
-            <img class="avatar" src="../assets/user.png"></img>
+            <img class="avatar" src="assets/user.png"></img>
             <div class="msg-username" >{{message.Username}}</div>
             <div class="msg-date" overline mb-4> {{message.Date }}</div>
           </div>
@@ -47,9 +47,9 @@
           @change="newMessageBody = $event"
           autofocus="true"
           full-width="true"
-          flat="true"
+          flat
           dark 
-          outlined="true"
+          outlined
         >
         </v-textarea>
         <!-- <div class="overline mb-4" v-if="creatingerror" >error while posting...</div> -->
@@ -164,10 +164,6 @@ export default {
   .modal{
 
   }
-  .message{
-    display: flex;
-    border: 1px gray;
-  }
   .msg-title{
     padding-left: 15px;
     display: flex;
@@ -198,6 +194,6 @@ export default {
   }
   .msg{
     margin: 5px;
-    background-color: #240e0b;
+    background-color: #000;
   }
 </style>
