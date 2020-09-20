@@ -10,14 +10,13 @@
       </v-toolbar-title>
       <v-spacer>
         <v-btn color="black" id="new-message" v-on:click="newMessageDialog=true">New Message</v-btn>
-        <v-btn color="black" id="loadnew" v-on:click="onScroll">LoadNew</v-btn>
       </v-spacer>
       <v-btn v-if="accessToken" color="gray" id="logout" v-on:click="Logout">Logout</v-btn>
   </v-app-bar>
 <!-- ------------------------------- -->
 
   <v-card height="48"></v-card>
-  <div class="content-center" @scroll="onScroll"> 
+  <div class="content-center" > 
     <v-card  
       color="gray accent-2"
       class="mx-auto msg"
@@ -34,7 +33,7 @@
           <div class="msg-content mb-1">{{message.Text}}</div>
         </div>
     </v-card>
-    <div @scroll="onScroll"></div> 
+     
   </div>
   <!-- end ---------------------------------------- -->
   <v-dialog 
@@ -45,16 +44,12 @@
     <v-card  class="modal" min-height="160">
       <div v-if="accessToken"> 
         <div class="overline mb-4">type your literals</div> 
-        <v-textarea
-          :value="newMessageBody" 
-          @change="newMessageBody = $event"
-          autofocus="true"
-          full-width="true"
-          flat
-          dark 
-          outlined
+        <textarea 
+          class="modal-textarea"
+          v-model="newMessageBody" 
+          autofocus
         >
-        </v-textarea>
+        </textarea>
         <!-- <div class="overline mb-4" v-if="creatingerror" >error while posting...</div> -->
         <v-btn v-on:click="CreateMessage">Create</v-btn>
       </div>
@@ -217,5 +212,14 @@ export default {
   .msg{
     margin: 5px;
     background-color: #000;
+  }
+  .modal-textarea {
+    width: 100%;
+    height: 240px;
+    background-color: #000;
+    color: #fff;
+    border: solid #343244;
+    resize: none;
+    font-size: 24px;
   }
 </style>
