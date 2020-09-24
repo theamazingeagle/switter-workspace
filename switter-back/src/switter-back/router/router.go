@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	expTime       = 3600
+	expTime       = 10 //3600
 	signingKey    = []byte("mlp976g4bo76t6785gfv56")
 	trustedRoutes = map[string]int{
 		"/api/login":       0,
@@ -92,7 +92,7 @@ func accessMiddleWare(handler http.Handler) http.Handler {
 					handler.ServeHTTP(w, r)
 				}
 			} else {
-				w.WriteHeader(http.StatusForbidden)
+				w.WriteHeader(http.StatusUnauthorized)
 				w.Write([]byte("no token"))
 			}
 		}
@@ -235,9 +235,10 @@ func CreateMessage(w http.ResponseWriter, r *http.Request) {
 func GetMessageList(w http.ResponseWriter, r *http.Request) {
 	page, err := strconv.ParseInt(r.URL.Query().Get("page"), 10, 64)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("invalid page index"))
-		return
+		//w.WriteHeader(http.StatusBadRequest)
+		//w.Write([]byte("invalid page index"))
+		//return
+		page = 0
 	}
 	messages := sql.GetMessages(page)
 

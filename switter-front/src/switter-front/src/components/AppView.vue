@@ -133,8 +133,10 @@ export default {
             this.newMessageDialog = false;
             this.newMessageBody = "";
             this.getMessages();
-          } else {
-            this.creatingerror = true;
+          } else if( responce.status == 401){
+            localStorage.removeItem("switterJWT");
+            this.$router.push({name:'login'});
+            
           }
         });
     },

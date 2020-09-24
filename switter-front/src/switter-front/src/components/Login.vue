@@ -55,12 +55,6 @@
           });
       },
     },
-    data: function() {
-      return {
-          email: '',
-          password: '',
-      }
-    },
   }
 </script>
 
