@@ -25,6 +25,7 @@ services:
         - NGINX_HOST=switter.pro
       links:
         - switter-back
+        - switter-auth
     switter-back:
       container_name: switter-back
       build: 
@@ -34,6 +35,16 @@ services:
         - 8192:8080
       links:
         - postgres
+    switter-auth:
+      container_name: switter-auth
+      build:
+        context: ./switter-auth/
+        dockerfile: Dockerfile
+      ports:
+        - 9000:9000
+      volumes:
+        - ./switter-auth/php-fpm.conf:/usr/local/etc/php-fpm.d/www.conf
+        - ./switter-auth/src/:/var/www/
     postgres:
       container_name: postgres
       build: ./postgres/

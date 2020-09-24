@@ -73,8 +73,6 @@ services:
       volumes:
         - ./switter-auth/php-fpm.conf:/usr/local/etc/php-fpm.d/www.conf
         - ./switter-auth/src/:/var/www/
-        - ./switter-auth/lighttpd.conf:/etc/lighttpd/lighttpd.conf
-        - /var/run/docker.sock:/tmp/docker.sock
     postgres:
       container_name: postgres
       build: ./postgres/
