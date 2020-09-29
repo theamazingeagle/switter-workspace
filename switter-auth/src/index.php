@@ -3,7 +3,11 @@ require './vendor/autoload.php';
 use \Firebase\JWT\JWT;
 
 
-/* ************ */
+/** 
+ * 
+ * 
+ * 
+*/
 $LoginCallback = function($val) {
     header('Content-Type: application/json');
     //echo "CreateCallback! ".$val."\n";
@@ -14,35 +18,41 @@ $LoginCallback = function($val) {
         if( $rbody["userEmail"] != null && $rbody["password"] != null ) {
             // user existing db check
             //$encodedPassword = password_hash($rbody["password"], PASSWORD_DEFAULT);
-            if ( $dbHelper->userCheck($rbody["userEmail"]) ){
-                if ($dbHelper->userPasswordCheck($rbody["userEmail"] , $rbody["password"] )) {
+            if ( $dbHelper->checkUserExist($rbody["userEmail"]) ){
+                if ($dbHelper->checkPassword($rbody["userEmail"] , $rbody["password"] )) {
                     $jwt = createJWT($rbody["userEmail"], $_ENV["JWT_SIGNING_KEY"], $_ENV["EXP_TIME"]);
                     $rt = createRT($jwt, $_ENV["RT_SIGNING_KEY"]);
                     $encodedRT = password_hash($rt, PASSWORD_DEFAULT);
-                    $dbHelper->userTokensUpdate($rbody["userEmail"], $encodedRT );
+                    $dbHelper->updateToken($rbody["userEmail"], $encodedRT );
                     $responce = array(
                         "jwt" => $jwt,
                         "rt" => $rt,
                     );
+                    http_response_code(200);
                     print(json_encode($responce));
                 }   else {
                     http_response_code(401);
-                    print("password not match");    
+                    print("PasswordNotMatch");    
                 }
             } else {
-                http_response_code(401);
-                print("user not exist");
+                http_response_code(404);
+                print("UserNotExist");
             }
         } else {
-            http_response_code(400);
-            print("auth data not full");
+            http_response_code(401);
+            print("AuthDataNotFull");
         }
     } else {
         http_response_code(400);
-        print("auth data not full");
+        print("NoData");
     }
     //print( $_ENV["SIGNING_KEY"]) ;
 };
+/** 
+ * 
+ * 
+ * 
+*/
 $RegisterCallback = function($val) {
     header('Content-Type: application/json');
     //echo "CreateCallback! ".$val."\n";
@@ -53,43 +63,126 @@ $RegisterCallback = function($val) {
         if( $rbody["userEmail"] != null && $rbody["password"] != null && $rbody["userName"] != null ) {
             // user existing db check
             
-            if (!$dbHelper->userCheck($rbody["userEmail"]  )) {
+            if (!$dbHelper->checkUserExist($rbody["userEmail"]  )) {
                 $jwt = createJWT($rbody["userEmail"], $_ENV["JWT_SIGNING_KEY"], $_ENV["EXP_TIME"]);
                 $rt = createRT($jwt, $_ENV["RT_SIGNING_KEY"]);
                 $encodedRT = password_hash($rt, PASSWORD_DEFAULT);
                 $encodedPassword = password_hash($rbody["password"], PASSWORD_DEFAULT);
-                $dbHelper->userRegister($rbody["userName"],$rbody["userEmail"],$encodedPassword, $encodedRT );
+                $dbHelper->createUser( $rbody["userName"],
+                                        $rbody["userEmail"],
+                                        $encodedPassword, 
+                                        $encodedRT );
                 $responce = array(
                     "jwt" => $jwt,
                     "rt" => $rt,
                 );
+                http_response_code(200);
                 print(json_encode($responce));
             }   else {
                 http_response_code(401);
-                print("user exist");    
+                print("UserExist");    
             }
         } else {
-            http_response_code(400);
-            print("auth data not full");
+            http_response_code(401);
+            print("AuthDataNotFull");
         }
     } else {
         http_response_code(400);
-        print("auth data not full");
+        print("NoData");
     }
 };
-$EditCallback = function($val) {
-    //echo "EditCallback ".$val."!\n";
-    print("nothing");
-};
+/** 
+ * 
+ * 
+ * 
+*/
 $UpdateCallback = function($val) {
     //echo "EditCallback ".$val."!\n";
-    print("nothing");
+    header('Content-Type: application/json');
+    $dbHelper = new DBHelper("host=postgres port=5432 user=postgres password=password port=5432 dbname=switter");
+    $rbody = json_decode( file_get_contents('php://input'),true ) ;
+    $errno = json_last_error();
+    if ( $errno == null ){
+        if( $rbody["jwt"] != null && $rbody["rt"] != null ){
+            if (checkTokens( $rbody["jwt"], $rbody["rt"]) ) {
+                http_response_code(401);
+                print("JWTRTIncompatible");
+            }
+            $decoded = JWT::decode( $rbody["jwt"], $_ENV["JWT_SIGNING_KEY"], array('HS256'));
+            $decoded_array = (array) $decoded;
+            
+            if ( $decoded_array["userEmail"] != null ){
+                if ($dbHelper->checkRT($decoded_array["userEmail"], $rbody["rt"]) ){
+                    $jwt = createJWT($decoded_array["userEmail"], $_ENV["JWT_SIGNING_KEY"], $_ENV["EXP_TIME"]);
+                    $rt = createRT($jwt, $_ENV["RT_SIGNING_KEY"]);
+                    $encodedRT = password_hash($rt, PASSWORD_DEFAULT);
+                    $dbHelper->updateToken($decoded_array["userEmail"], $encodedRT );
+                    $responce = array(
+                        "jwt" => $jwt,
+                        "rt" => $rt,
+                    );
+                    http_response_code(200);
+                    print(json_encode($responce));
+                } else {
+                    http_response_code(401);
+                    print("InvalidRefreshToken");                
+                };
+            } else {
+                http_response_code(401);
+                print("IncorrectJWT");                
+            };
+        } else {
+            http_response_code(401);
+            print("DataNotFull");
+        }
+    } else {
+        http_response_code(400);
+        print("NoData");
+    }
 };
+/** 
+ * 
+ * 
+ * 
+*/
 $DeleteCallback = function($val) {
     //echo "DeleteCallback ".$val."!\n";
-    print_r($_POST);
+    header('Content-Type: application/json');
+    $dbHelper = new DBHelper("host=postgres port=5432 user=postgres password=password port=5432 dbname=switter");
+    $rbody = json_decode( file_get_contents('php://input'),true ) ;
+    $errno = json_last_error();
+    if ( $errno == null ){
+        if( $rbody["jwt"] != null && $rbody["rt"] != null ){
+            if (checkTokens( $rbody["jwt"], $rbody["rt"]) ) {
+                http_response_code(401);
+                print("JWTRTIncompatible");
+            }
+            $decoded = JWT::decode( $rbody["jwt"], $_ENV["JWT_SIGNING_KEY"], array('HS256'));
+            $decoded_array = (array) $decoded;
+            
+            if ( $decoded_array["userEmail"] != null ){
+                if ($dbHelper->checkRT($decoded_array["userEmail"], $rbody["rt"]) ){
+                    $dbHelper->deleteToken($decoded_array["userEmail"]);
+                    http_response_code(200);
+                    print("logout succesfully");
+                } else {
+                    http_response_code(401);
+                    print("InvalidRefreshToken");                
+                };
+            } else {
+                http_response_code(401);
+                print("IncorrectJWT");                
+            };
+        } else {
+            http_response_code(401);
+            print("DataNotFull");
+        }
+    } else {
+        http_response_code(400);
+        print("NoData");
+    }
 };
-/**/ 
+/* ******************************** */
 
 function createJWT($userEmail, $signingKey, $expTime){
     $payload = array(
@@ -121,13 +214,13 @@ class DBHelper {
     function __destruct(){
         pg_close($this->$dbConn);
     }
-    public function userRegister($userName, $userEmail, $password, $userRT){
+    public function createUser($userName, $userEmail, $password, $userRT){
         $result = pg_query_params($this->$dbConn, 
             "INSERT INTO users(user_name,user_password,user_email,user_rt) VALUES($1, $2, $3, $4)",
             array($userName, $password, $userEmail, $userRT));
         return $result? true: false;
     }
-    public function userCheck($userEmail){
+    public function checkUserExist($userEmail){
         $result = pg_query_params($this->$dbConn, 
             "SELECT * FROM users WHERE user_email=$1 ;",
             array($userEmail));
@@ -137,23 +230,32 @@ class DBHelper {
             return false;
         }
     }
-    public function userPasswordCheck($userEmail, $password){
+    public function checkPassword($userEmail, $password){
         $query = pg_query_params($this->$dbConn, 
             "SELECT user_password FROM users WHERE user_email=$1 ;",
             array($userEmail));
         $result = pg_fetch_all($query);
         return password_verify($password, $result[0]["user_password"]);
     }
-    public function userTokensUpdate($userEmail, $rt){
+    public function checkRT($userEmail, $rt){
+        $query = pg_query_params($this->$dbConn, 
+            "SELECT user_rt FROM users WHERE user_email=$1 ;",
+            array($userEmail)
+        );
+        $result = pg_fetch_all($query);
+        if($result == null ) return false;
+        return password_verify($rt, $result[0]["user_rt"]);
+    }
+    public function updateToken($userEmail, $rt){
         $result = pg_query_params($this->$dbConn, 
             "UPDATE USERS SET user_rt=$1 WHERE user_email=$2 ;",
             array( $rt, $userEmail));
             return $result? true: false;
     }
-    public function userTokensDelete($userEmail){
+    public function deleteToken($userEmail){
         $result = pg_query_params($this->$dbConn, 
-            "UPDATE USERS SET user_rt=0 WHERE user_email=$2 ;",
-            array( $rt, $userEmail));
+            "UPDATE USERS SET user_rt=0 WHERE user_email=$1 ;",
+            array($userEmail));
             return $result? true: false;
     }
 }
