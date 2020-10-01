@@ -120,27 +120,79 @@ export default {
       this.$modal.show('create-message-modal');
     },
     CreateMessage:function(){
+      //console.log("JJJJJJJJJJJWT: ", localStorage.getItem("switterJWT"));
       let messageData = new Object();
       messageData.Text = this.newMessageBody;
-      messageData.UserID = parseInt(localStorage.getItem("switterUserID") );
+      //messageData.UserID = parseInt(localStorage.getItem("switterUserID") );
       
       this.$axios
         .post( this.$hostname + '/api/createmessage',
-        messageData,
-        {headers:{"Authorization":"Bearer "+localStorage.getItem("switterJWT")  }}
-        ).then(response => {
+          messageData,
+          {headers:{
+            "Authorization":"Bearer "+localStorage.getItem("switterJWT"),
+            'Content-Type':'application/json',
+          }}
+        ).then((response) => {
+          console.log("~~~ reading response ...");
           if(response.status == 200){
             this.newMessageDialog = false;
             this.newMessageBody = "";
-            this.getMessages();
-          } else if( responce.status == 401){
-            localStorage.removeItem("switterJWT");
-            this.$router.push({name:'login'});
-            
+            //this.getMessages();
+            document.location.reload();
           }
+        },
+        (response)=>{
+          console.log("~~~ trying update...");
+            let message = {
+                  "jwt":localStorage.getItem("switterJWT"),
+                  "rt":localStorage.getItem("switterRT"),
+                };
+
+            this.$axios
+              .post( this.$hostname + '/auth/update',
+                message,
+                {
+                  headers:{'Content-Type':'application/json',
+                }}
+            ).then( (response) => {
+
+              if (response.status == 200){
+                console.log("~~~ update success");
+                console.log("OOOOHMYYYYY : ",response.data);
+                localStorage.setItem("switterJWT",  response.data.jwt);
+                localStorage.setItem("switterRT",  response.data.rt);
+                this.CreateMessage();
+              }
+            },
+            (response) => {
+              console.log("~~~ update fail");
+              let message = {
+                  "jwt":localStorage.getItem("switterJWT"),
+                  "rt":localStorage.getItem("switterRT"),
+                };
+                this.$axios
+                  .post( this.$hostname + '/auth/delete',
+                  message,
+                  {
+                    headers:{'Content-Type':'application/json',
+                  }}
+                  );
+                //localStorage.removeItem("switterJWT");
+                this.$router.push({name:'login'});
+            });
         });
     },
     Logout:function(){
+      this.$axios
+        .post( this.$hostname + '/auth/delete',
+        {
+          "jwt":localStorage.getItem("switterJWT"),
+          "rt":localStorage.getItem("switterRT"),
+        },
+        {
+          headers:{'Content-Type':'application/json',
+        }}
+        );
       localStorage.removeItem("switterJWT");
       this.$router.push({name:'login'});
     },

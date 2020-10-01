@@ -24,21 +24,25 @@
     name: 'register',
     methods: {
       register:function(){
-        let postBody = new URLSearchParams(); 
-        postBody.append("userName", this.username)
-        postBody.append("userEmail", this.email)
-        postBody.append("userPassword", this.password);
-        
+        // let postBody = new URLSearchParams(); 
+        // postBody.append("userName", this.username)
+        // postBody.append("userEmail", this.email)
+        // postBody.append("userPassword", this.password);
+        let postBody = {
+          "userName": this.username,
+          "userEmail": this.email,
+          "password": this.password,
+        };
         this.$axios
           .post(
-            this.$hostname + '/api/register', 
+            this.$hostname + '/auth/register', 
             postBody,
-            {headers:{'Content-Type':'application/x-www-form-urlencoded'}}
+            {headers:{'Content-Type':'application/json'}}
           ).then(response=>{
             if(response.status == 200) {
-              //localStorage.setItem("jwt",  response.data);
-              //this.$router.push({name:'appview'});
-              this.$router.push({name:'login'});
+              localStorage.setItem("switterJWT",  response.data.jwt);
+              localStorage.setItem("switterRT",  response.data.rt);
+              this.$router.push({name:'appview'});
             }
             
           });

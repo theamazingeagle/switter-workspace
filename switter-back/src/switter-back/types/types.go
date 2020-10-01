@@ -5,6 +5,7 @@ type User struct {
 	UserName string `json:"Username"`
 	Email    string `json:"Email"`
 	Password string `json:"Password"`
+	RT       string `json:"RT"`
 }
 
 type Message struct {

@@ -107,22 +107,29 @@ $UpdateCallback = function($val) {
             if (checkTokens( $rbody["jwt"], $rbody["rt"]) ) {
                 http_response_code(401);
                 print("JWTRTIncompatible");
+                return;
             }
-            $decoded = JWT::decode( $rbody["jwt"], $_ENV["JWT_SIGNING_KEY"], array('HS256'));
-            $decoded_array = (array) $decoded;
-            
-            if ( $decoded_array["userEmail"] != null ){
-                if ($dbHelper->checkRT($decoded_array["userEmail"], $rbody["rt"]) ){
-                    $jwt = createJWT($decoded_array["userEmail"], $_ENV["JWT_SIGNING_KEY"], $_ENV["EXP_TIME"]);
+            //$decoded = JWT::decode( $rbody["jwt"], $_ENV["JWT_SIGNING_KEY"], array('HS256'));
+            //$decoded_array = (array) $decoded;
+            $userEmail = extractUserEmailFromJWT($rbody["jwt"]);
+
+            if ( $userEmail != null ){
+                if ($dbHelper->checkRT($userEmail, $rbody["rt"]) ){
+                    $jwt = createJWT($userEmail, $_ENV["JWT_SIGNING_KEY"], $_ENV["EXP_TIME"]);
                     $rt = createRT($jwt, $_ENV["RT_SIGNING_KEY"]);
-                    $encodedRT = password_hash($rt, PASSWORD_DEFAULT);
-                    $dbHelper->updateToken($decoded_array["userEmail"], $encodedRT );
-                    $responce = array(
-                        "jwt" => $jwt,
-                        "rt" => $rt,
-                    );
-                    http_response_code(200);
-                    print(json_encode($responce));
+                    if ( $jwt != null && $rt != null ){
+                        $encodedRT = password_hash($rt, PASSWORD_DEFAULT);
+                        $dbHelper->updateToken($userEmail, $encodedRT );
+                        $responce = array(
+                            "jwt" => $jwt,
+                            "rt" => $rt,
+                        );
+                        http_response_code(200);
+                        print(json_encode($responce));
+                    } else {
+                        http_response_code(500);
+                        print("SHeetHaPPenz");
+                    }
                 } else {
                     http_response_code(401);
                     print("InvalidRefreshToken");                
@@ -160,9 +167,9 @@ $DeleteCallback = function($val) {
             $decoded = JWT::decode( $rbody["jwt"], $_ENV["JWT_SIGNING_KEY"], array('HS256'));
             $decoded_array = (array) $decoded;
             
-            if ( $decoded_array["userEmail"] != null ){
-                if ($dbHelper->checkRT($decoded_array["userEmail"], $rbody["rt"]) ){
-                    $dbHelper->deleteToken($decoded_array["userEmail"]);
+            if ( $decoded_array["Email"] != null ){
+                if ($dbHelper->checkRT($decoded_array["Email"], $rbody["rt"]) ){
+                    $dbHelper->deleteToken($decoded_array["Email"]);
                     http_response_code(200);
                     print("logout succesfully");
                 } else {
@@ -186,13 +193,39 @@ $DeleteCallback = function($val) {
 
 function createJWT($userEmail, $signingKey, $expTime){
     $payload = array(
-        "StandardClaims" => array(
-            "exp" => time() * $expTime,
-            "iat" => time(),
-        ),
-        "userEmail" => $userEmail,
+        "exp" => time() + $expTime,
+        "iat" => time(),
+        "Email" => $userEmail,
     );
     return JWT::encode($payload, $signingKey );
+}
+function reCreate($jwt){
+    $tks = \explode('.', $jwt);
+    if ( count($tks) != 3 ) { 
+        print("invalid jwt");
+        return null; 
+    };
+    $payload = json_decode( b64_decode( $tks[1] ));
+    if (!isset($payload->Email) ){
+        print("bad payload");
+        return null;
+    }
+    return createJWT($payload->Email, $_ENV["JWT_SIGNING_KEY"], $_ENV["EXP_TIME"]);
+
+}
+function extractUserEmailFromJWT($jwt){
+    $tks = \explode('.', $jwt);
+    if ( count($tks) != 3 ) { 
+        print("invalid jwt");
+        return null; 
+    };
+    $payload = json_decode( base64_decode( $tks[1] ));
+    if (!isset($payload->Email) ){
+        print("bad payload");
+        return null;
+    }
+    return $payload->Email;
+
 }
 function createRT($jwt, $signingKey){
     $data = explode(".", $jwt)[2];

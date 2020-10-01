@@ -30,22 +30,23 @@
     name: 'login',
     methods: {
       login:function(){
-        let postBody = new URLSearchParams(); 
-        postBody.append("userEmail", this.email)
-        postBody.append("userPassword", this.password);
-        
+        // let postBody = new URLSearchParams(); 
+        // postBody.append("userEmail", this.email)
+        // postBody.append("userPassword", this.password);
+        let postBody = {
+          "userEmail": this.email,
+          "password": this.password,
+        };
         this.$axios
           .post(
-            this.$hostname + '/api/login', 
+            this.$hostname + '/auth/login', 
             postBody,
-            {headers:{'Content-Type':'application/x-www-form-urlencoded'}}
+            {headers:{'Content-Type':'application/json'}}
           ).then(response=>{
             if( response.data != null){
               if( response.status == 200){
-                localStorage.setItem("switterJWT",  response.data.JWT);
-                localStorage.setItem("switterUserID",  response.data.UserID);
-                localStorage.setItem("switterUserName",  response.data.UserName);
-                localStorage.setItem("switterUserEmail",  response.data.UserEmail);
+                localStorage.setItem("switterJWT",  response.data.jwt);
+                localStorage.setItem("switterRT",  response.data.rt);
                 this.$router.push({name:'appview'});
               } else {
                 this.$router.push({name:'register'});

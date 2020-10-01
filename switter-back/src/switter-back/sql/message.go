@@ -60,7 +60,7 @@ func GetMessages(page int64) []types.MessageInfo {
 	for rows.Next() {
 		message := &types.MessageInfo{}
 		rows.Scan(&message.MessageID, &message.Text, &message.Date, &message.UserName)
-		log.Println("extracted contains: ", message)
+		//log.Println("extracted contains: ", message)
 		messages = append(messages, *message)
 	}
 
