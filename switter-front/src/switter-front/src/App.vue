@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app class="back">
     <router-view></router-view>
     
   </v-app>
@@ -43,5 +43,8 @@ export default {
 
   .small-container {
     max-width: 680px;
+  }
+  .back{
+    background: gray;
   }
 </style>

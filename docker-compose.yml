@@ -29,6 +29,7 @@ services:
       links:
         - switter-front
         - switter-back
+        - switter-auth
     switter-front:
       container_name: switter-front
       build:
@@ -62,6 +63,20 @@ services:
     #    dockerfile: Dockerfile
     #  ports:
     #    - 6666:6666
+    switter-auth:
+      container_name: switter-auth
+      build:
+        context: ./switter-auth/
+        dockerfile: Dockerfile
+      ports:
+        - 9000:9000
+      volumes:
+        - ./switter-auth/php-fpm.conf:/usr/local/etc/php-fpm.d/www.conf
+        - ./switter-auth/src/:/var/www/
+      env_file:
+        - ./var.env
+      links:
+        - postgres
     postgres:
       container_name: postgres
       build: ./postgres/

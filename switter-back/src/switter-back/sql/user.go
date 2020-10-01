@@ -21,7 +21,7 @@ func GetUser(ID int64) *types.User {
 		log.Println("sql.GetUser err: ", row)
 	}
 	user := &types.User{}
-	row.Scan(&user.ID, &user.UserName, &user.Password, &user.Email)
+	row.Scan(&user.ID, &user.UserName, &user.Password, &user.Email, &user.RT)
 	log.Println("sql.GetUser result: ", user)
 	return user
 }
@@ -34,7 +34,7 @@ func GetUserByEmail(email string) *types.User {
 	}
 	user := &types.User{}
 	// user_id | user_name | user_email | user_password
-	err := row.Scan(&user.ID, &user.UserName, &user.Email, &user.Password)
+	err := row.Scan(&user.ID, &user.UserName, &user.Email, &user.Password, &user.RT)
 	if err != nil {
 		log.Println("sql.GetUserByEmail error, no row: ", err)
 		return nil

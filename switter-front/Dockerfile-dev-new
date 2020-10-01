@@ -4,6 +4,7 @@ WORKDIR /var/www/switter-front/
 COPY ./src/switter-front/package.json .
 COPY ./src/switter-front/package-lock.json .
 COPY ./src/switter-front/public/ .
+COPY ./src/switter-front/src/assets ./public
 RUN mkdir ./src
 COPY ./src/switter-front/babel.config.js .
 COPY ./src/switter-front/vue.config.js .
