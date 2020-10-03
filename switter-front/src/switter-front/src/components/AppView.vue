@@ -20,7 +20,7 @@
     <v-card  
       color="gray accent-2"
       class="mx-auto msg"
-      min-width="540"
+      width="540"
       min-height="160"
       outlined
       v-for="message in appmessage" :key="message.ID">
