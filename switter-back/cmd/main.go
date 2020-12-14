@@ -18,9 +18,15 @@ type AppConf struct {
 
 func main() {
 	appConf, err := loadConfig("./")
-
-	sql.CreateConn(AppConf.SQL)
-	router.Start(configuration.AppConf.Host, configuration.AppConf.Port)
+	if err != nil {
+		return
+	}
+	postgres, err := postgres.NewPostgres(appConf.DB)
+	if err != nil {
+		return
+	}
+	server := server.NewServer(appConf.Server)
+	server.Run()
 }
 
 func loadConfig(path string) (AppConf, error) {
