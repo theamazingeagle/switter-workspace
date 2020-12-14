@@ -1,4 +1,4 @@
-package router
+package server
 
 import (
 	"encoding/json"
@@ -16,6 +16,11 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
+type ServerConf struct {
+	Host string `json:"host"`
+	Port int    `json:"port"`
+}
+
 var (
 	expTime       = 10 //3600
 	signingKey    = []byte("mlp976g4bo76t6785gfv56")
@@ -31,6 +36,7 @@ type Claims struct {
 	jwt.StandardClaims // default files of JWT
 	Email              string
 }
+
 // type Claims struct {
 // 	jwt.StandardClaims // default files of JWT
 // 	EXP string `json:"exp"`
@@ -118,7 +124,7 @@ func accessMiddleWare(handler http.Handler) http.Handler {
 			authTokenHeader := r.Header.Get("Authorization")
 			if len(authTokenHeader) > 0 {
 				checkRes := checkToken(authTokenHeader, signingKey)
-				if  checkRes == nil {
+				if checkRes == nil {
 					handler.ServeHTTP(w, r)
 				} else {
 					log.Println("ckeck tocken rison: ", checkRes)

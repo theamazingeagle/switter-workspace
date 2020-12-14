@@ -9,6 +9,14 @@ import (
 
 	_ "github.com/lib/pq"
 )
+type PostgresConf struct {
+	HostName   string `json:"hostname"`
+	DriverName string `json:"drivername"`
+	DBName     string `json:"dbname"`
+	UserName   string `json:"username"`
+	Password   string `json:"password"`
+	Port       int  `json:"port"`
+}
 
 var (
 	dbConn *sql.DB

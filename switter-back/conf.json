@@ -1,12 +1,21 @@
 {
-    "host":"switter-back",
-    "port":8080,
-    "sql":{
+    "server":{
+        "host":"switter-back",
+        "port":8000
+    },
+    "db":{
     	"dbname":"switter",
     	"hostname":"postgres",
         "drivername":"postgres",
         "username":"postgres",
         "password":"password",
         "port":5432
+    },
+    "auth":{
+        "jwtsignkey":"jwtsignkey",
+        "rtsignkey":"rtsignkey",
+        "exptime":3600,
+        "signmethod":"HS256",
+        "hashingcost":10
     }
 }

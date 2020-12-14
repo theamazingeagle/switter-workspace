@@ -2,61 +2,44 @@ package main
 
 import (
 	"encoding/json"
-	"go-http/configuration"
-	"go-http/sql"
 	"io/ioutil"
-	"os"
-
-	//
 	"log"
+	"os"
+	"switter-back/internal/server"
+	"switter-back/internal/service/auth"
+	"switter-back/internal/service/db/postgres"
 )
 
-type SqlConfiguration struct {
-	HostName   string `json:"hostname"`
-	DriverName string `json:"drivername"`
-	DBName     string `json:"dbname"`
-	UserName   string `json:"username"`
-	Password   string `json:"password"`
-	Port       int16  `json:"port"`
+type AppConf struct {
+	Server server.ServerConf     `json:"server"`
+	DB     postgres.PostgresConf `json:"db"`
+	Auth   auth.AuthConf         `json:"auth"`
 }
-
-//--------------------------------
-type AppConfiguration struct {
-	Host string           `json:"host"`
-	Port int              `json:"port"`
-	SQL  SqlConfiguration `json:"sql"`
-}
-
-var (
-	AppConf *types.AppConfiguration
-)
 
 func main() {
-	loadConfig()
-	log.Println("starting at ", configuration.AppConf.Port, " port")
+	appConf, err := loadConfig("./")
+
 	sql.CreateConn(AppConf.SQL)
 	router.Start(configuration.AppConf.Host, configuration.AppConf.Port)
 }
 
-// LoadConfig from app home dir
-func loadConfig() {
-	workDir, err := os.Getwd()
+func loadConfig(path string) (AppConf, error) {
+	jsonFile, err := os.Open(path + "/conf.json")
 	if err != nil {
-		log.Println("config.LoadConfig #1, getting working directory error: ", err)
-	}
-	jsonFile, err := os.Open(workDir + "/conf.json")
-	if err != nil {
-		log.Println("config.LoadConfig #2, config file opening error: ", err)
+		log.Println("config.LoadConfig(), config file opening error: ", err)
+		return AppConf{}, err
 	}
 	defer jsonFile.Close()
 	byteFileContent, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
-		log.Println("config.LoadConfig #3, config file readin error: ", err)
+		log.Println("config.LoadConfig(), config file readin error: ", err)
+		return AppConf{}, err
 	}
-	AppConf = &types.AppConfiguration{}
-	err = json.Unmarshal([]byte(byteFileContent), AppConf)
+	appConf := AppConf{}
+	err = json.Unmarshal([]byte(byteFileContent), appConf)
 	if err != nil {
-		log.Println("config.LoadConfig #4, config file decoding error: ", err)
+		log.Println("config.LoadConfig(), config file decoding error: ", err)
+		return AppConf{}, err
 	}
-
+	return appConf, nil
 }
