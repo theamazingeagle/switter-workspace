@@ -5,8 +5,10 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"switter-back/internal/core/auth"
+	"switter-back/internal/core/message"
+	"switter-back/internal/core/profile"
 	"switter-back/internal/server"
-	"switter-back/internal/service/auth"
 	"switter-back/internal/service/db/postgres"
 )
 
@@ -22,10 +24,13 @@ func main() {
 		return
 	}
 	postgres, err := postgres.NewPostgres(appConf.DB)
+	authDispatcher := auth.NewAuthDispatcher(appConf.Auth, postgres)
+	messageDispatcher := message.NewMessageDispatcher(postgres)
+	profileDispatcher := profile.NewProfileDispatcher(postgres)
 	if err != nil {
 		return
 	}
-	server := server.NewServer(appConf.Server)
+	server := server.NewServer(appConf.Server, authDispatcher, messageDispatcher, profileDispatcher)
 	server.Run()
 }
 

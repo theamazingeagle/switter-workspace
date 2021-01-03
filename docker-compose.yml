@@ -1,17 +1,7 @@
 version: "3.7"
 volumes:
   "pg12-data":
-#networks:
-#  postgres-network:
-#    driver: bridge
-#  service-network:
-#    driver: bridge
 services:
-    #ftp-docker:
-    #  build: ftp-docker/
-    #  ports: 
-    #    - 8021:80
-
     nginx:
       container_name: nginx
       build:
@@ -56,38 +46,9 @@ services:
       #  - postgres-network
       links:
         - postgres
-    #dict:
-    #  container_name: dict
-    #  build:
-    #    context: ./dict
-    #    dockerfile: Dockerfile
-    #  ports:
-    #    - 6666:6666
-    switter-auth:
-      container_name: switter-auth
-      build:
-        context: ./switter-auth/
-        dockerfile: Dockerfile
-      ports:
-        - 9000:9000
-      volumes:
-        - ./switter-auth/php-fpm.conf:/usr/local/etc/php-fpm.d/www.conf
-        - ./switter-auth/src/:/var/www/
-      env_file:
-        - ./var.env
-      links:
-        - postgres
     postgres:
       container_name: postgres
       build: ./postgres/
       #image: postgres
       ports:
         - 5432:5432
-      volumes:
-        - pg12-data:/var/lib/postgresql/
-        #- type: bind
-        ##  source: ./postgres/data/
-        #  target: /var/lib/postgresql/pgdata:z
-        #- "./postgres/data/:/var/lib/postgresql/"
-      #networks:
-      #  - postgres-network

@@ -1,34 +1,29 @@
 package types
 
+import "github.com/dgrijalva/jwt-go"
+
 type User struct {
-	ID       int64  `json:"ID"`
-	UserName string `json:"Username"`
-	Email    string `json:"Email"`
-	Password string `json:"Password"`
-	RT       string `json:"RT"`
+	ID       int64  `json:"id"`
+	UserName string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	RT       string `json:"refresh_token"`
 }
 
 type Message struct {
-	ID     int64  `json:"ID"`
-	Url    string `json:"Url"`
-	UserID int64  `json:"UserID"`
-	Date   string `json:"Date"`
-	//RootID int64 `json:RootID`
-	Text string `json:"Text"`
+	ID     int64  `json:"id"`
+	UserID int64  `json:"user_id"`
+	Date   string `json:"date"`
+	Text   string `json:"text"`
 }
-type MessageInfo struct {
-	MessageID int64  `json:"ID"`
-	Text      string `json:"Text"`
-	Date      string `json:"Date"`
-	UserName  string `json:"Username"`
-}
+
 type AuthInfo struct {
-	JWT       string `json:"JWT"`
-	UserID    int64  `json:"UserID"`
-	UserName  string `json:"Username"`
-	UserEmail string `json:"UserEmail"`
+	JWT string `json:"jwt"`
+	RT  string `json:"refresh_token"`
 }
-type NewMessage struct {
-	Text   string `json:"Text"`
+
+type Claims struct {
+	jwt.StandardClaims
+	Email  string `json:"Email"`
 	UserID int    `json:"UserID"`
 }

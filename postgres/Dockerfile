@@ -1,12 +1,7 @@
 FROM postgres:alpine
-ADD schema.sql /docker-entrypoint-initdb.d/schema.sql
-ENV PGDATA=/var/lib/postgresql/pgdata/
-RUN adduser -D docker
-USER docker
-#VOLUME "pg_data"
-
-USER postgres
+ADD schema.sql /docker-entrypoint-initdb.d/01-schema.sql
+ADD schema.sql /docker-entrypoint-initdb.d/02-init.sql
 ENV POSTGRES_USER postgres
-ENV POSTGRES_DB switter
+ENV POSTGRES_DB switterdb
 ENV POSTGRES_PASSWORD=password
 EXPOSE 5432

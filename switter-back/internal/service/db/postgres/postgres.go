@@ -2,13 +2,18 @@ package postgres
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"strconv"
-
 	"switter-back/internal/types"
 
 	_ "github.com/lib/pq"
+)
+
+var (
+	ErrNotFound  = errors.New("Not found")
+	ErrQueryExec = errors.New("Failed to exec query")
 )
 
 type PostgresConf struct {
@@ -37,47 +42,46 @@ func NewPostgres(conf PostgresConf) (*Postgres, error) {
 	return postgres, nil
 }
 
-// CloseConn ...
+// TODO
 func CloseConn() {
-	//close(dbConn)
 }
 
-//
-
-func (p *Postgres) CreateUser(userName, password, email string) error {
-	_, err := p.conn.Exec("INSERT INTO users(user_name,user_password,user_email) VALUES($1, $2, $3)", userName, password, email)
+func (p *Postgres) CreateUser(username, password, email string) error {
+	_, err := p.conn.Exec("INSERT INTO users(username,password,email) VALUES($1, $2, $3)", username, password, email)
 	if err != nil {
-		log.Println("sql.CreateUser err: ", err)
-		return fmt.Errorf("sql.CreateUser Error: ", err)
+		log.Println("postgres.CreateUser err: ", err)
+		return ErrQueryExec
 	}
 	return nil
 }
-func (p *Postgres) GetUser(ID int64) *types.User {
+
+func (p *Postgres) GetUserByID(ID int64) (*types.User, bool, error) {
 	row := p.conn.QueryRow("SELECT * FROM users WHERE user_id=$1", ID)
-	if row == nil {
-		log.Println("sql.GetUser err: ", row)
-	}
 	user := &types.User{}
-	row.Scan(&user.ID, &user.UserName, &user.Password, &user.Email, &user.RT)
-	log.Println("sql.GetUser result: ", user)
-	return user
+	err := row.Scan(&user.ID, &user.UserName, &user.Password, &user.Email, &user.RT)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return user, false, ErrNotFound
+		}
+		log.Println("sql.GetUser err: ", row)
+		return user, false, ErrQueryExec
+	}
+	return user, true, nil
 }
 
-func (p *Postgres) GetUserByEmail(email string) *types.User {
-	row := p.conn.QueryRow("SELECT * FROM users WHERE user_email=$1", email)
-	if row == nil {
-		log.Println("sql.GetUserByEmail err: ", row)
-		return nil
-	}
+func (p *Postgres) GetUserByEmail(email string) (*types.User, bool, error) {
+	row := p.conn.QueryRow("SELECT * FROM users WHERE email=$1", email)
 	user := &types.User{}
-	// user_id | user_name | user_email | user_password
 	err := row.Scan(&user.ID, &user.UserName, &user.Email, &user.Password, &user.RT)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return user, false, ErrNotFound
+		}
 		log.Println("sql.GetUserByEmail error, no row: ", err)
-		return nil
+		return user, false, ErrQueryExec
 	}
 	log.Println("sql.GetUserByEmail result: ", user)
-	return user
+	return user, true, nil
 }
 
 func (p *Postgres) UpdateUserName(ID int64, newName string) {
@@ -105,6 +109,14 @@ func (p *Postgres) DeleteUser(ID int64) {
 	}
 }
 
+func (p *Postgres) DeleteRefreshTokenByEmail(email string) error {
+	_, err := p.conn.Exec("UPDATE users SET refresh_token = NULL WHERE user_email = $1", email)
+	if err != nil {
+		log.Println("Failed to delete refresh token: ", err)
+	}
+	return nil
+}
+
 func (p *Postgres) CreateMessage(text string, userID int) error {
 	_, err := p.conn.Exec(`INSERT INTO messages(message_text, message_userid)
 						  VALUES($1, $2);`,
@@ -121,7 +133,7 @@ func (p *Postgres) GetMessage(messageID string) types.Message {
 		log.Println("sql.GetMessage err: ", row)
 	}
 	message := &types.Message{}
-	row.Scan(&message.ID, &message.Url, &message.UserID, &message.Date, &message.Text)
+	row.Scan(&message.ID, &message.UserID, &message.Date, &message.Text)
 	return *message
 }
 
@@ -139,8 +151,7 @@ func (p *Postgres) DeleteMessage(ID int64) {
 	}
 }
 
-// GetMessages() returns all messages
-func (p *Postgres) GetMessages(page int64) []types.MessageInfo {
+func (p *Postgres) GetMessages(page int64) []types.Message {
 	pageStr := strconv.FormatInt(page, 10)
 	queryStr := `select m.message_id,m.message_text, to_char(m.message_date, 'DD Mon YYYY HH24:MI'), u.user_name
 	from messages m
@@ -151,13 +162,12 @@ func (p *Postgres) GetMessages(page int64) []types.MessageInfo {
 		log.Println("sql.GetMessages err: ", err)
 	}
 	//messages := make([]*types.Message,0)
-	messages := []types.MessageInfo{}
+	messages := []types.Message{}
 	for rows.Next() {
-		message := &types.MessageInfo{}
-		rows.Scan(&message.MessageID, &message.Text, &message.Date, &message.UserName)
+		message := &types.Message{}
+		rows.Scan(&message.ID, &message.Text, &message.Date, &message.UserID)
 		//log.Println("extracted contains: ", message)
 		messages = append(messages, *message)
 	}
-
 	return messages
 }

@@ -1,7 +1,6 @@
 {
     "server":{
-        "host":"switter-back",
-        "port":8000
+        "addr":":8000"
     },
     "db":{
     	"dbname":"switter",
