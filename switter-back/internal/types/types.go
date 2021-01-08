@@ -2,19 +2,23 @@ package types
 
 import "github.com/dgrijalva/jwt-go"
 
+type UserID int64
+
 type User struct {
-	ID       int64  `json:"id"`
+	ID       UserID `json:"id"`
 	UserName string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	RT       string `json:"refresh_token"`
 }
 
+type MessageID int64
+
 type Message struct {
-	ID     int64  `json:"id"`
-	UserID int64  `json:"user_id"`
-	Date   string `json:"date"`
-	Text   string `json:"text"`
+	ID     MessageID `json:"id"`
+	UserID UserID    `json:"user_id"`
+	Date   string    `json:"date"`
+	Text   string    `json:"text"`
 }
 
 type AuthInfo struct {
@@ -25,5 +29,5 @@ type AuthInfo struct {
 type Claims struct {
 	jwt.StandardClaims
 	Email  string `json:"Email"`
-	UserID int    `json:"UserID"`
+	UserID UserID `json:"UserID"`
 }

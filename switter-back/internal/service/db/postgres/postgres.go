@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strconv"
 	"switter-back/internal/types"
 
 	_ "github.com/lib/pq"
@@ -56,7 +55,7 @@ func (p *Postgres) CreateUser(username, password, email string) error {
 }
 
 func (p *Postgres) GetUserByID(ID int64) (*types.User, bool, error) {
-	row := p.conn.QueryRow("SELECT * FROM users WHERE user_id=$1", ID)
+	row := p.conn.QueryRow("SELECT * FROM users WHERE id=$1", ID)
 	user := &types.User{}
 	err := row.Scan(&user.ID, &user.UserName, &user.Password, &user.Email, &user.RT)
 	if err != nil {
@@ -85,89 +84,97 @@ func (p *Postgres) GetUserByEmail(email string) (*types.User, bool, error) {
 }
 
 func (p *Postgres) UpdateUserName(ID int64, newName string) {
-	_, err := p.conn.Exec("UPDATE users SET user_name = $1 WHERE user_id = $2", newName, ID)
+	_, err := p.conn.Exec("UPDATE users SET username = $1 WHERE id = $2", newName, ID)
 	if err != nil {
 		log.Println("sql.UpdateUserName err: ", err)
 	}
 }
 func (p *Postgres) UpdateUserPassword(ID int64, newPass string) {
-	_, err := p.conn.Exec("UPDATE users SET user_password = $1 WHERE user_id = $2", newPass, ID)
+	_, err := p.conn.Exec("UPDATE users SET password = $1 WHERE id = $2", newPass, ID)
 	if err != nil {
 		log.Println("sql.UpdateUserPassword err: ", err)
 	}
 }
 func (p *Postgres) UpdateUserEmail(ID int64, newEmail string) {
-	_, err := p.conn.Exec("UPDATE users SET user_email = $1 WHERE user_id = $2", newEmail, ID)
+	_, err := p.conn.Exec("UPDATE users SET email = $1 WHERE id = $2", newEmail, ID)
 	if err != nil {
 		log.Println("sql.UpdateUserEmail err: ", err)
 	}
 }
 func (p *Postgres) DeleteUser(ID int64) {
-	_, err := p.conn.Exec("DELETE  FROM users WHERE user_id=$1", ID)
+	_, err := p.conn.Exec("DELETE  FROM users WHERE id=$1", ID)
 	if err != nil {
 		log.Println("sql.DeleteUser err: ", err)
 	}
 }
 
-func (p *Postgres) DeleteRefreshTokenByEmail(email string) error {
-	_, err := p.conn.Exec("UPDATE users SET refresh_token = NULL WHERE user_email = $1", email)
+func (p *Postgres) DeleteRefreshToken(userID types.UserID) error {
+	_, err := p.conn.Exec("UPDATE users SET refresh_token = NULL WHERE id = $1", userID)
 	if err != nil {
 		log.Println("Failed to delete refresh token: ", err)
 	}
 	return nil
 }
 
-func (p *Postgres) CreateMessage(text string, userID int) error {
-	_, err := p.conn.Exec(`INSERT INTO messages(message_text, message_userid)
+func (p *Postgres) CreateMessage(userID types.UserID, text string) error {
+	_, err := p.conn.Exec(`INSERT INTO messages(msg, user_id)
 						  VALUES($1, $2);`,
 		text, userID)
 	if err != nil {
-		return fmt.Errorf("sql.CreateUser err: ", err)
+		log.Println("Failed to create message")
+		return ErrQueryExec
 	}
 	return nil
 }
 
-func (p *Postgres) GetMessage(messageID string) types.Message {
-	row := p.conn.QueryRow("SELECT * FROM messages WHERE message_id=$1 ;", messageID)
-	if row == nil {
-		log.Println("sql.GetMessage err: ", row)
-	}
-	message := &types.Message{}
-	row.Scan(&message.ID, &message.UserID, &message.Date, &message.Text)
-	return *message
-}
-
-func (p *Postgres) UpdateMessage(newText string, userID int) {
-	_, err := p.conn.Exec("UPDATE messages SET message_text = $1 WHERE user_id = $2", newText, userID)
+func (p *Postgres) GetMessage(messageID types.MessageID) (types.Message, bool, error) {
+	row := p.conn.QueryRow("SELECT * FROM messages WHERE id=$1 ;", messageID)
+	message := types.Message{}
+	err := row.Scan(&message.ID, &message.UserID, &message.Date, &message.Text)
 	if err != nil {
-		log.Println("sql.UpdateMessage err: ", err)
+		if err == sql.ErrNoRows {
+			log.Println("sql.GetMessage err: ", err)
+			return types.Message{}, false, ErrNotFound
+		}
+		log.Println("sql.GetMessage err: ", err)
+		return types.Message{}, false, ErrQueryExec
 	}
+	return message, true, nil
 }
 
-func (p *Postgres) DeleteMessage(ID int64) {
-	_, err := p.conn.Exec("DELETE FROM messages WHERE message_id=$1", ID)
-	if err != nil {
-		log.Println("sql.DeleteMessage err: ", err)
-	}
-}
-
-func (p *Postgres) GetMessages(page int64) []types.Message {
-	pageStr := strconv.FormatInt(page, 10)
-	queryStr := `select m.message_id,m.message_text, to_char(m.message_date, 'DD Mon YYYY HH24:MI'), u.user_name
-	from messages m
-	inner join users u on u.user_id=m.message_userid
-	order by m.message_date desc limit 20 offset ` + pageStr + ` ;`
-	rows, err := p.conn.Query(queryStr)
+func (p *Postgres) GetMessageList(page int) ([]types.Message, error) {
+	rows, err := p.conn.Query(
+		`select m.id, m.msg, to_char(m.msg_date, 'DD Mon YYYY HH24:MI'), u.username
+		from messages m
+		inner join users u on u.id=m.user_id
+		order by m.msg_date desc limit 20 offset $1`, page)
 	if err != nil {
 		log.Println("sql.GetMessages err: ", err)
+		return []types.Message{}, ErrQueryExec
 	}
-	//messages := make([]*types.Message,0)
 	messages := []types.Message{}
 	for rows.Next() {
 		message := &types.Message{}
 		rows.Scan(&message.ID, &message.Text, &message.Date, &message.UserID)
-		//log.Println("extracted contains: ", message)
 		messages = append(messages, *message)
 	}
-	return messages
+	return messages, nil
+}
+
+func (p *Postgres) UpdateMessage(ID types.MessageID, newText string) error {
+	_, err := p.conn.Exec("UPDATE messages SET msg = $1 WHERE id = $2", newText, ID)
+	if err != nil {
+		log.Println("sql.UpdateMessage err: ", err)
+		return ErrQueryExec
+	}
+	return nil
+}
+
+func (p *Postgres) DeleteMessage(userID types.UserID, ID types.MessageID) error {
+	_, err := p.conn.Exec("DELETE FROM messages WHERE id=$1", ID)
+	if err != nil {
+		log.Println("sql.DeleteMessage err: ", err)
+		return ErrQueryExec
+	}
+	return nil
 }

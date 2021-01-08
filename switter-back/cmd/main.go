@@ -7,7 +7,6 @@ import (
 	"os"
 	"switter-back/internal/core/auth"
 	"switter-back/internal/core/message"
-	"switter-back/internal/core/profile"
 	"switter-back/internal/server"
 	"switter-back/internal/service/db/postgres"
 )
@@ -24,13 +23,12 @@ func main() {
 		return
 	}
 	postgres, err := postgres.NewPostgres(appConf.DB)
-	authDispatcher := auth.NewAuthDispatcher(appConf.Auth, postgres)
-	messageDispatcher := message.NewMessageDispatcher(postgres)
-	profileDispatcher := profile.NewProfileDispatcher(postgres)
+	authDispatcher := auth.New(appConf.Auth, postgres)
+	messageDispatcher := message.New(postgres)
 	if err != nil {
 		return
 	}
-	server := server.NewServer(appConf.Server, authDispatcher, messageDispatcher, profileDispatcher)
+	server := server.NewServer(appConf.Server, authDispatcher, &messageDispatcher)
 	server.Run()
 }
 

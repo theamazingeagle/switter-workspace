@@ -30,7 +30,7 @@ var (
 type Storage interface {
 	GetUserByEmail(email string) (*types.User, bool, error)
 	CreateUser(username, password, email string) error
-	DeleteRefreshTokenByEmail(email string) error
+	DeleteRefreshToken(userID types.UserID) error
 }
 
 type AuthDispatcher struct {
@@ -46,7 +46,7 @@ type AuthConf struct {
 	HashingCost   int
 }
 
-func NewAuthDispatcher(conf AuthConf, storage Storage) *AuthDispatcher {
+func New(conf AuthConf, storage Storage) *AuthDispatcher {
 	return &AuthDispatcher{conf: conf, storage: storage}
 }
 
@@ -155,16 +155,8 @@ func (a *AuthDispatcher) Refresh(authInfo types.AuthInfo) (types.AuthInfo, error
 }
 
 // Logout - set rt to null
-func (a *AuthDispatcher) Logout(authInfo types.AuthInfo) error {
-	tk := &types.Claims{}
-	_, err := jwt.ParseWithClaims(authInfo.JWT, tk, func(token *jwt.Token) (interface{}, error) {
-		return a.conf.JWTSigningKey, nil
-	})
-	if err != nil {
-		log.Println(" not possible to parse token: ", err)
-		return ErrNotParse
-	}
-	err = a.storage.DeleteRefreshTokenByEmail(tk.Email)
+func (a *AuthDispatcher) Logout(userID types.UserID) error {
+	err := a.storage.DeleteRefreshToken(userID)
 	if err != nil {
 		log.Println(" not possible to parse token: ", err)
 		return ErrRefreshTokenNotDeleted

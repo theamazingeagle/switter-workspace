@@ -12,7 +12,7 @@ CREATE TABLE messages(
     id SERIAL NOT NULL PRIMARY KEY,
     msg TEXT
     user_id BIGINT,
-    date TIMESTAMP
+    msg_date TIMESTAMP
 );
 
 ALTER TABLE messages ADD FOREIGN KEY (user_id) REFERENCES users(user_id);
