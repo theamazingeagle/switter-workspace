@@ -1,21 +1,15 @@
 # build stage
-FROM node:lts-alpine as build-stage
+FROM node:lts-alpine
 WORKDIR /var/www/switter-front/
-COPY ./src/switter-front/package.json .
-
-#COPY ./src/switter-front/package.json .
-#WORKDIR /app/switter-front/
-#RUN npm install -g @vue/cli @vue/cli-service
-#RUN npm install -D mini-css-extract-plugin
-#RUN npm install --save vue-axios axios
+COPY ./package.json .
+COPY ./package-lock.json .
+COPY ./public/ .
+COPY ./src/assets ./public
+RUN mkdir ./src
+COPY ./babel.config.js .
+COPY ./vue.config.js .
+RUN npm cache verify
 RUN npm install
-COPY ./src/switter-front/ /var/www/switter-front/
-RUN npm run build
-#RUN vue build ./src/main.js
-# production-stage
-FROM nginx:stable-alpine as production-stage
-COPY ./nginx.conf /etc/nginx/nginx.conf
-COPY --from=build-stage /var/www/switter-front/dist /usr/share/nginx/html
-COPY ./src/switter-front/src/assets /usr/share/nginx/html/assets
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+
+EXPOSE 8080
+CMD ["npm", "run", "serve"]

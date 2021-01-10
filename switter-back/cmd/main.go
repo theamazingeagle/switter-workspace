@@ -18,6 +18,7 @@ type AppConf struct {
 }
 
 func main() {
+	log.SetFlags(log.Llongfile)
 	appConf, err := loadConfig("./")
 	if err != nil {
 		return
@@ -45,7 +46,7 @@ func loadConfig(path string) (AppConf, error) {
 		return AppConf{}, err
 	}
 	appConf := AppConf{}
-	err = json.Unmarshal([]byte(byteFileContent), appConf)
+	err = json.Unmarshal([]byte(byteFileContent), &appConf)
 	if err != nil {
 		log.Println("config.LoadConfig(), config file decoding error: ", err)
 		return AppConf{}, err

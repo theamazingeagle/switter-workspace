@@ -35,11 +35,12 @@
         };
         this.$axios
           .post(
-            this.$hostname + '/auth/register', 
+            this.$hostname + '/api/auth/register', 
             postBody,
             {headers:{'Content-Type':'application/json'}}
           ).then(response=>{
             if(response.status == 200) {
+              console.log("------", response.data)
               localStorage.setItem("switterJWT",  response.data.jwt);
               localStorage.setItem("switterRT",  response.data.rt);
               this.$router.push({name:'appview'});

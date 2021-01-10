@@ -45,13 +45,15 @@ func NewPostgres(conf PostgresConf) (*Postgres, error) {
 func CloseConn() {
 }
 
-func (p *Postgres) CreateUser(username, password, email string) error {
-	_, err := p.conn.Exec("INSERT INTO users(username,password,email) VALUES($1, $2, $3)", username, password, email)
+func (p *Postgres) CreateUser(username, password, email string) (types.User, error) {
+	row := p.conn.QueryRow("INSERT INTO users(username,password,email) VALUES($1, $2, $3) RETURNING *", username, password, email)
+	user := types.User{}
+	err := row.Scan(&user)
 	if err != nil {
 		log.Println("postgres.CreateUser err: ", err)
-		return ErrQueryExec
+		return types.User{}, ErrQueryExec
 	}
-	return nil
+	return user, nil
 }
 
 func (p *Postgres) GetUserByID(ID int64) (*types.User, bool, error) {
@@ -74,12 +76,11 @@ func (p *Postgres) GetUserByEmail(email string) (*types.User, bool, error) {
 	err := row.Scan(&user.ID, &user.UserName, &user.Email, &user.Password, &user.RT)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return user, false, ErrNotFound
+			return user, false, nil
 		}
 		log.Println("sql.GetUserByEmail error, no row: ", err)
 		return user, false, ErrQueryExec
 	}
-	log.Println("sql.GetUserByEmail result: ", user)
 	return user, true, nil
 }
 
@@ -142,21 +143,21 @@ func (p *Postgres) GetMessage(messageID types.MessageID) (types.Message, bool, e
 	return message, true, nil
 }
 
-func (p *Postgres) GetMessageList(page int) ([]types.Message, error) {
+func (p *Postgres) GetMessageList(page int) ([]types.FullMessageData, error) {
 	rows, err := p.conn.Query(
-		`select m.id, m.msg, to_char(m.msg_date, 'DD Mon YYYY HH24:MI'), u.username
+		`select m.id, m.msg, to_char(m.msg_date, 'DD Mon YYYY HH24:MI'), u.username, m.user_id
 		from messages m
 		inner join users u on u.id=m.user_id
 		order by m.msg_date desc limit 20 offset $1`, page)
 	if err != nil {
 		log.Println("sql.GetMessages err: ", err)
-		return []types.Message{}, ErrQueryExec
+		return []types.FullMessageData{}, ErrQueryExec
 	}
-	messages := []types.Message{}
+	messages := []types.FullMessageData{}
 	for rows.Next() {
-		message := &types.Message{}
-		rows.Scan(&message.ID, &message.Text, &message.Date, &message.UserID)
-		messages = append(messages, *message)
+		message := types.FullMessageData{}
+		rows.Scan(&message.ID, &message.Text, &message.Date, &message.UserName, &message.UserID)
+		messages = append(messages, message)
 	}
 	return messages, nil
 }

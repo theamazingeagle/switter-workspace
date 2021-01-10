@@ -18,7 +18,7 @@ var (
 type Storage interface {
 	CreateMessage(userID types.UserID, text string) error
 	GetMessage(messageID types.MessageID) (types.Message, bool, error)
-	GetMessageList(page int) ([]types.Message, error)
+	GetMessageList(page int) ([]types.FullMessageData, error)
 	UpdateMessage(ID types.MessageID, newText string) error
 	DeleteMessage(userID types.UserID, ID types.MessageID) error
 }
@@ -31,11 +31,11 @@ func New(s Storage) MessageDispatcher {
 	return MessageDispatcher{storage: s}
 }
 
-func (md *MessageDispatcher) GetListPage(page int) ([]types.Message, error) {
+func (md *MessageDispatcher) GetListPage(page int) ([]types.FullMessageData, error) {
 	msgs, err := md.storage.GetMessageList(page)
 	if err != nil {
 		log.Println("Failed to create message")
-		return []types.Message{}, ErrNotFound
+		return []types.FullMessageData{}, ErrNotFound
 	}
 	return msgs, nil
 }

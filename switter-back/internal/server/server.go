@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -14,9 +14,18 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var (
+	ErrTokenInvalid = errors.New("Token invalid")
+)
+
 type ServerConf struct {
 	Addr          string `json:"addr"`
 	JWTSigningKey string `json:"jwtsignkey"`
+}
+type AuthCred struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type Callback func(w http.ResponseWriter, r *http.Request)
@@ -29,7 +38,7 @@ type AuthDispatcher interface {
 }
 
 type MessageDispatcher interface {
-	GetListPage(page int) ([]types.Message, error)
+	GetListPage(page int) ([]types.FullMessageData, error)
 	GetMessage(msgID types.MessageID) (types.Message, error)
 	CreateMessage(userID types.UserID, message string) error
 	UpdateMessage(userID types.UserID, msgID types.MessageID, message string) error
@@ -83,7 +92,12 @@ func (s *Server) accessMiddleWare(handlerFunc Callback) Callback {
 			sendMessage(w, http.StatusUnauthorized, "Token expired")
 			return
 		}
-		userID, _ := getUserIDFromJWT(token, s.conf.JWTSigningKey)
+		userID, err := getUserIDFromJWT(token, s.conf.JWTSigningKey)
+		if err != nil {
+			log.Println("failed to get User ID from JWT, ID: ", userID)
+			return
+		}
+
 		newContext := context.WithValue(r.Context(), "UserID", userID)
 		handlerFunc(w, r.WithContext(newContext))
 		return
@@ -91,67 +105,63 @@ func (s *Server) accessMiddleWare(handlerFunc Callback) Callback {
 }
 
 func (s *Server) login(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	authCred := AuthCred{}
+	err := json.NewDecoder(r.Body).Decode(&authCred)
 	if err != nil {
-		log.Println("Failed to read form data", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("no auth data"))
+		log.Println("Bad auth data", err)
+		sendMessage(w, http.StatusBadRequest, "Bad auth data")
 		return
 	}
 
-	email := strings.TrimSpace(r.FormValue("userEmail"))
-	password := strings.TrimSpace(r.FormValue("userPassword"))
-	if len(email) == 0 && len(password) == 0 {
-		log.Println("No form data", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("no auth data"))
+	if len(authCred.Email) == 0 && len(authCred.Password) == 0 {
+		log.Println("No auth data", err)
+		sendMessage(w, http.StatusUnauthorized, "No auth data")
 		return
 	}
 
-	AuthData, err := s.authDispatcher.Login(email, password)
+	AuthData, err := s.authDispatcher.Login(authCred.Email, authCred.Password)
 	if err != nil {
-		log.Println("Failed to register", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("no auth data"))
+		log.Println("Failed to authenticate", err)
+		sendMessage(w, http.StatusBadRequest, "Failed to authenticate")
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(AuthData)
 	if err != nil {
-		log.Println("Failed to marshall json", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("no auth data"))
+		log.Println("Failed to make answer", err)
+		sendMessage(w, http.StatusBadRequest, "Failed to make answer")
 		return
 	}
-
 }
 
 func (s *Server) register(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	authCred := AuthCred{}
+	err := json.NewDecoder(r.Body).Decode(&authCred)
 	if err != nil {
-		log.Println("Failed to read form data", err)
+		log.Println("Bad auth data", err)
+		sendMessage(w, http.StatusBadRequest, "Bad auth data")
 		return
 	}
 
-	email := strings.TrimSpace(r.FormValue("userEmail"))
-	password := strings.TrimSpace(r.FormValue("userPassword"))
-	username := strings.TrimSpace(r.FormValue("userName"))
-	if len(username) == 0 && len(email) == 0 && len(password) == 0 {
+	if len(authCred.Username) == 0 && len(authCred.Email) == 0 && len(authCred.Password) == 0 {
 		log.Println("No form data", err)
+		sendMessage(w, http.StatusUnauthorized, "No form data")
 		return
 	}
 
-	AuthData, err := s.authDispatcher.Register(username, email, password)
+	AuthData, err := s.authDispatcher.Register(authCred.Username, authCred.Email, authCred.Password)
 	if err != nil {
 		log.Println("Failed to register", err)
+		sendMessage(w, http.StatusInternalServerError, "No form data")
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(AuthData)
 	if err != nil {
-		log.Println("Failed to marshall json", err)
+		log.Println("Failed to make answer", err)
+		sendMessage(w, http.StatusInternalServerError, "Failed to make answer")
 		return
 	}
 }
@@ -247,26 +257,27 @@ func (s *Server) deleteMessage(w http.ResponseWriter, r *http.Request) {
 func check(JWT, JWTSigningKey string) bool {
 	tk := &types.Claims{}
 	token, err := jwt.ParseWithClaims(JWT, tk, func(token *jwt.Token) (interface{}, error) {
-		return JWTSigningKey, nil
+		return []byte(JWTSigningKey), nil
 	})
 	if err != nil {
-		log.Println(" not possible to parse token: ", err)
+		log.Println("Not possible to parse token: ", err)
 		return false
 	}
-	if token.Valid {
-		log.Println("token invalid")
-		return true
+	if !token.Valid {
+		log.Println("Token invalid")
+		return false
 	}
-	return false
+	return true
 }
 
 func getUserIDFromJWT(JWTtoken, signingKey string) (types.UserID, error) {
 	claims := &types.Claims{}
 	token, err := jwt.ParseWithClaims(JWTtoken, claims, func(token *jwt.Token) (interface{}, error) {
-		return signingKey, nil
+		return []byte(signingKey), nil
 	})
 	if err != nil {
-		return 0, fmt.Errorf(" not possible to parse token: ", err)
+		log.Println("Token invalid")
+		return 0, ErrTokenInvalid
 	}
 	return token.Claims.(*types.Claims).UserID, nil
 }

@@ -1,10 +1,10 @@
 {
     "server":{
-        "addr":":8000",
-        "jwtsignkey":"jwtsignkey"
+        "addr":":8080",
+        "jwtsignkey":"ho498h4389n49n8"
     },
     "db":{
-    	"dbname":"switter",
+    	"dbname":"switterdb",
     	"hostname":"postgres",
         "drivername":"postgres",
         "username":"postgres",
@@ -12,7 +12,7 @@
         "port":5432
     },
     "auth":{
-        "jwtsignkey":"jwtsignkey",
+        "jwtsignkey":"ho498h4389n49n8",
         "rtsignkey":"rtsignkey",
         "exptime":3600,
         "signmethod":"HS256",

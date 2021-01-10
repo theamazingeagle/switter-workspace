@@ -10,10 +10,11 @@ CREATE TABLE users(
 
 CREATE TABLE messages(
     id SERIAL NOT NULL PRIMARY KEY,
-    msg TEXT
+    msg TEXT,
     user_id BIGINT,
     msg_date TIMESTAMP
 );
 
-ALTER TABLE messages ADD FOREIGN KEY (user_id) REFERENCES users(user_id);
-ALTER TABLE messages ALTER COLUMN date SET DEFAULT Now;
+ALTER TABLE users ALTER COLUMN refresh_token SET DEFAULT '';
+ALTER TABLE messages ADD FOREIGN KEY (user_id) REFERENCES users(id);
+ALTER TABLE messages ALTER COLUMN msg_date SET DEFAULT Now();

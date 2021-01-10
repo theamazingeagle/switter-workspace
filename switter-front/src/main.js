@@ -24,21 +24,9 @@ import '@/plugins/axios'
 import '@/plugins/router'
 import vuetify from '@/plugins/vuetify';
 /**/
-Vue.config.productionTip = false
-/**/
+Vue.config.productionTip = false;
 
 Vue.prototype.$hostname = HOST_NAME
-/**/
-//--- Auth Hook -------------
-// const ifNotAuthenticated = (to, from, next) => {
-//   if (localStorage.getItem("switterJWT") !=="") {
-//     next()
-//     return
-//   }
-//   next('/login')
-// }
-//---------------------------
-
 
 let router = new Router({
   routes: [

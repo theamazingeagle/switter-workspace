@@ -1,7 +1,7 @@
 <template>
   <div id="login">
     <div class="center">
-      <v-img src='assets/switter-logo.png'  ></v-img>
+      <img class="logo" src="../assets/switter-logo.png"></img>
       
       <!-- <h2 class="header">Login to SWITTER </h2> -->
       <v-form class="form">
@@ -34,19 +34,20 @@
         // postBody.append("userEmail", this.email)
         // postBody.append("userPassword", this.password);
         let postBody = {
-          "userEmail": this.email,
+          "email": this.email,
           "password": this.password,
         };
         this.$axios
           .post(
-            this.$hostname + '/auth/login', 
+            this.$hostname + '/api/auth/login', 
             postBody,
             {headers:{'Content-Type':'application/json'}}
           ).then(response=>{
             if( response.data != null){
               if( response.status == 200){
-                localStorage.setItem("switterJWT",  response.data.jwt);
-                localStorage.setItem("switterRT",  response.data.rt);
+                console.log("@@@@@ ", response);
+                localStorage.setItem("switterJWT", response.data['jwt']);
+                localStorage.setItem("switterRT", response.data['refresh_token']);
                 this.$router.push({name:'appview'});
               } else {
                 this.$router.push({name:'register'});
@@ -75,6 +76,9 @@
   width:20%;
 }
 .btn-login{
+  width: 100%;
+}
+.logo{
   width: 100%;
 }
 .to-register{

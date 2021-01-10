@@ -21,6 +21,14 @@ type Message struct {
 	Text   string    `json:"text"`
 }
 
+type FullMessageData struct {
+	ID       MessageID `json:"id"`
+	Text     string    `json:"text"`
+	Date     string    `json:"date"`
+	UserName string    `json:"username"`
+	UserID   UserID    `json:"user_id"`
+}
+
 type AuthInfo struct {
 	JWT string `json:"jwt"`
 	RT  string `json:"refresh_token"`

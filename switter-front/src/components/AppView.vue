@@ -4,8 +4,8 @@
   <v-app-bar color="gray accent-8" dense dark fixed >
       <v-toolbar-title>
           <router-link class="nav-link-register" to="/">
-            <v-img src='assets/switter-logo.png' height="48px" width="144px">
-            </v-img>
+            <img class="logo"src='../assets/switter-logo.png' height="48px" width="144px">
+            </img>
           </router-link>
       </v-toolbar-title>
       <v-spacer>
@@ -26,11 +26,11 @@
       v-for="message in appmessage" :key="message.ID">
         <div >
           <div class="msg-title">
-            <img class="avatar" src="assets/user.png"></img>
-            <div class="msg-username" >{{message.Username}}</div>
-            <div class="msg-date" overline mb-4> {{message.Date }}</div>
+            <img class="avatar" src="../assets/user.png"></img>
+            <div class="msg-username" >{{message['username']}}</div>
+            <div class="msg-date" overline mb-4> {{message['date'] }}</div>
           </div>
-          <div class="msg-content mb-1">{{message.Text}}</div>
+          <div class="msg-content mb-1">{{message['text']}}</div>
         </div>
     </v-card>
      
@@ -107,7 +107,10 @@ export default {
   methods:{
     getMessages:function(){
       this.$axios
-        .get(this.$hostname + '/api/getmessages?page='+this.msgListPage)
+        .get(this.$hostname + '/api/message/all?page='+this.msgListPage,
+          {headers:{
+            "Authorization":"Bearer "+localStorage.getItem("switterJWT")}}
+          )
         .then(response => {
           
           this.appmessage = this.appmessage.concat(response.data);
@@ -126,7 +129,7 @@ export default {
       //messageData.UserID = parseInt(localStorage.getItem("switterUserID") );
       
       this.$axios
-        .post( this.$hostname + '/api/createmessage',
+        .post( this.$hostname + '/api/message/create',
           messageData,
           {headers:{
             "Authorization":"Bearer "+localStorage.getItem("switterJWT"),
@@ -149,7 +152,7 @@ export default {
                 };
 
             this.$axios
-              .post( this.$hostname + '/auth/update',
+              .post( this.$hostname + '/api/auth/refresh',
                 message,
                 {
                   headers:{'Content-Type':'application/json',
@@ -171,7 +174,7 @@ export default {
                   "rt":localStorage.getItem("switterRT"),
                 };
                 this.$axios
-                  .post( this.$hostname + '/auth/delete',
+                  .post( this.$hostname + '/api/auth/logout',
                   message,
                   {
                     headers:{'Content-Type':'application/json',
@@ -184,7 +187,7 @@ export default {
     },
     Logout:function(){
       this.$axios
-        .post( this.$hostname + '/auth/delete',
+        .post( this.$hostname + '/api/auth/logout',
         {
           "jwt":localStorage.getItem("switterJWT"),
           "rt":localStorage.getItem("switterRT"),
@@ -200,12 +203,6 @@ export default {
       if( Math.max(window.pageYOffset, document.documentElement.scrollTop, document.body.scrollTop) + window.innerHeight === document.documentElement.offsetHeight ) {
         this.getMessages();
       }
-      //console.log("... scroll-scroll-scroll ... ");
-      //console.log("window.pageYOffset : ", window.pageYOffset);
-      //console.log("document.documentElement.offsetHeight : ", document.documentElement.offsetHeight);
-      //console.log("document.documentElement.scrollTop : ", document.documentElement.scrollTop);
-      //console.log("document.body.scrollTop : ", document.body.scrollTop);
-      //console.log("window.innerHeight : ", window.innerHeight);
     }
   }
 }
@@ -232,8 +229,8 @@ export default {
     padding: 40px;
     font-size: 130%;
   }
-  .modal{
-
+  .logo{
+    width: 150px;
   }
   .msg-title{
     padding-left: 15px;

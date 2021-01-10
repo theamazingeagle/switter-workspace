@@ -21,6 +21,7 @@ var (
 	ErrRTNotCreated           = errors.New("Refresh token not created")
 	ErrNoData                 = errors.New("No data")
 	ErrNotParse               = errors.New("Failed to parse token")
+	ErrUserExist              = errors.New("User exist")
 	ErrUserNotFound           = errors.New("User not found")
 	ErrUserNotCreated         = errors.New("User not created")
 	ErrUserNotGet             = errors.New("Failed to get user")
@@ -29,7 +30,7 @@ var (
 
 type Storage interface {
 	GetUserByEmail(email string) (*types.User, bool, error)
-	CreateUser(username, password, email string) error
+	CreateUser(username, password, email string) (types.User, error)
 	DeleteRefreshToken(userID types.UserID) error
 }
 
@@ -39,11 +40,11 @@ type AuthDispatcher struct {
 }
 
 type AuthConf struct {
-	JWTSigningKey string
-	RTSigningKey  string
-	Exptime       int
-	SigningMethod string
-	HashingCost   int
+	JWTSigningKey string `json:"jwtsignkey"`
+	RTSigningKey  string `json:"rtsignkey"`
+	Exptime       int    `json:"exptime"`
+	SigningMethod string `json:"signmethod"`
+	HashingCost   int    `json:"hashingcost"`
 }
 
 func New(conf AuthConf, storage Storage) *AuthDispatcher {
@@ -58,7 +59,7 @@ func (a *AuthDispatcher) Login(email, password string) (types.AuthInfo, error) {
 	if user.Password != password {
 		return types.AuthInfo{}, fmt.Errorf("Password not match")
 	}
-	jwt, err := makeJWT(user.Email, a.conf.JWTSigningKey, a.conf.Exptime)
+	jwt, err := makeJWT(*user, a.conf.JWTSigningKey, a.conf.Exptime)
 	if err != nil {
 		return types.AuthInfo{}, err
 	}
@@ -75,20 +76,20 @@ func (a *AuthDispatcher) Login(email, password string) (types.AuthInfo, error) {
 
 func (a *AuthDispatcher) Register(username, email, password string) (types.AuthInfo, error) {
 	_, exist, err := a.storage.GetUserByEmail(email)
-	if err != nil {
+
+	if exist {
+		log.Println("User exist")
+		return types.AuthInfo{}, ErrUserExist
+	} else if err != nil {
 		log.Println("Quering error")
 		return types.AuthInfo{}, ErrUserNotFound
 	}
-	if exist {
-		log.Println("User exist")
-		return types.AuthInfo{}, ErrUserNotFound
-	}
-	err = a.storage.CreateUser(username, password, email)
+	user, err := a.storage.CreateUser(username, password, email)
 	if err != nil {
 		log.Println("Failed to create user")
 		return types.AuthInfo{}, ErrUserNotCreated
 	}
-	jwt, err := makeJWT(email, a.conf.JWTSigningKey, a.conf.Exptime)
+	jwt, err := makeJWT(user, a.conf.JWTSigningKey, a.conf.Exptime)
 	if err != nil {
 		log.Println("Failed to make JWT")
 		return types.AuthInfo{}, ErrJWTNotCreated
@@ -123,7 +124,7 @@ func (a *AuthDispatcher) Refresh(authInfo types.AuthInfo) (types.AuthInfo, error
 		return types.AuthInfo{}, ErrJWTInvalid
 	}
 	// check rt
-	rt, exist, err := a.storage.GetUserByEmail(tk.Email)
+	user, exist, err := a.storage.GetUserByEmail(tk.Email)
 	if err != nil {
 		log.Println("Failed to get refresh token", err)
 		return types.AuthInfo{}, ErrNoData
@@ -132,14 +133,14 @@ func (a *AuthDispatcher) Refresh(authInfo types.AuthInfo) (types.AuthInfo, error
 		log.Println("User not found", err)
 		return types.AuthInfo{}, ErrUserNotFound
 	}
-	if rt.RT != authInfo.RT {
+	if user.RT != authInfo.RT {
 		log.Println("Invalid refresh token", err)
 		return types.AuthInfo{}, ErrRTInvalid
 	}
 	// TO DO: check jwt and rt equality
 
 	// make jwt
-	authInfo.JWT, err = makeJWT(tk.Email, a.conf.JWTSigningKey, a.conf.Exptime)
+	authInfo.JWT, err = makeJWT(*user, a.conf.JWTSigningKey, a.conf.Exptime)
 	if err != nil {
 		log.Println("JWT not created: ", err)
 		return types.AuthInfo{}, ErrJWTNotCreated
@@ -164,17 +165,19 @@ func (a *AuthDispatcher) Logout(userID types.UserID) error {
 	return nil
 }
 
-func makeJWT(email, signingKey string, expTime int) (string, error) {
+func makeJWT(user types.User, signingKey string, expTime int) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, &types.Claims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Duration(expTime) * time.Second).Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},
-		Email: email,
+		Email:  user.Email,
+		UserID: user.ID,
 	})
-	tokenString, err := token.SignedString(signingKey)
+	tokenString, err := token.SignedString([]byte(signingKey))
 	if err != nil {
-		return "", fmt.Errorf("router.generateAccessTokenString error: %w", err)
+		log.Println("Failed to make JWT: ", err)
+		return "", ErrJWTNotCreated
 	}
 	return tokenString, nil
 }

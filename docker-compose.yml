@@ -12,43 +12,31 @@ services:
       volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./nginx/etc/nginx/nginx-dev.conf:/etc/nginx/nginx.conf
-      #networks:
-      #  - service-network
       environment:
-        - NGINX_HOST=switter.dev
+        - NGINX_HOST=switter.pro
       links:
         - switter-front
         - switter-back
-        - switter-auth
     switter-front:
       container_name: switter-front
       build:
         context: ./switter-front/
-        dockerfile: Dockerfile-dev-new
+        dockerfile: Dockerfile
       volumes:
-      #- "./src/switter-front/:/var/www/switter-front/"
-      - "./switter-front/src/switter-front/src:/var/www/switter-front/src"
+      - "./switter-front/src:/var/www/switter-front/src"
       ports:
         - 8181:8080
-      #networks:
-      #  - service-network
     switter-back:
       container_name: switter-back
-      #build: ./switter-back/
       build: 
         context: ./switter-back/
-        #dockerfile: ./switter-back/Dockerfile
         dockerfile: ./Dockerfile
       ports:
         - 8192:8080
-      #networks:
-      #  - service-network
-      #  - postgres-network
       links:
         - postgres
     postgres:
       container_name: postgres
       build: ./postgres/
-      #image: postgres
       ports:
         - 5432:5432
