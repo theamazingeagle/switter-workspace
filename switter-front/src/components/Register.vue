@@ -33,7 +33,7 @@
           "userEmail": this.email,
           "password": this.password,
         };
-        this.$axios
+        this.$http
           .post(
             this.$hostname + '/api/auth/register', 
             postBody,

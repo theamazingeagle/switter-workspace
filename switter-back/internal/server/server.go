@@ -125,7 +125,6 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 		sendMessage(w, http.StatusBadRequest, "Failed to authenticate")
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(AuthData)
 	if err != nil {

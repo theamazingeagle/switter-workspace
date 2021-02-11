@@ -1,0 +1,38 @@
+[0;4m [0m[0;4m UNIT                              [0m[0;4m LOAD  [0m[0;4m ACTIVE[0m[0;4m SUB    [0m[0;4m DESCRIPTION                                                                  [0m
+  alsa-restore.service               loaded active exited  Save/Restore Sound Card State                                                
+  dbus.service                       loaded active running D-Bus System Message Bus                                                     
+  dhcpcd.service                     loaded active running dhcpcd on all interfaces                                                     
+  docker.service                     loaded active running Docker Application Container Engine                                          
+  getty@tty1.service                 loaded active running Getty on tty1                                                                
+  kmod-static-nodes.service          loaded active exited  Create list of static device nodes for the current kernel                    
+  lvm2-lvmetad.service               loaded active running LVM2 metadata daemon                                                         
+  lvm2-monitor.service               loaded active exited  Monitoring of LVM2 mirrors, snapshots etc. using dmeventd or progress polling
+  NetworkManager-wait-online.service loaded active exited  Network Manager Wait Online                                                  
+  NetworkManager.service             loaded active running Network Manager                                                              
+  polkit.service                     loaded active running Authorization Manager                                                        
+  rtkit-daemon.service               loaded active running RealtimeKit Scheduling Policy Service                                        
+  systemd-binfmt.service             loaded active exited  Set Up Additional Binary Formats                                             
+  systemd-fsck@dev-sda2.service      loaded active exited  File System Check on /dev/sda2                                               
+  systemd-fsck@dev-sdb4.service      loaded active exited  File System Check on /dev/sdb4                                               
+  systemd-journal-flush.service      loaded active exited  Flush Journal to Persistent Storage                                          
+  systemd-journald.service           loaded active running Journal Service                                                              
+  systemd-logind.service             loaded active running User Login Management                                                        
+  systemd-modules-load.service       loaded active exited  Load Kernel Modules                                                          
+  systemd-random-seed.service        loaded active exited  Load/Save Random Seed                                                        
+  systemd-remount-fs.service         loaded active exited  Remount Root and Kernel File Systems                                         
+  systemd-sysctl.service             loaded active exited  Apply Kernel Variables                                                       
+  systemd-tmpfiles-setup-dev.service loaded active exited  Create Static Device Nodes in /dev                                           
+  systemd-tmpfiles-setup.service     loaded active exited  Create Volatile Files and Directories                                        
+  systemd-udev-trigger.service       loaded active exited  Coldplug All udev Devices                                                    
+  systemd-udevd.service              loaded active running Rule-based Manager for Device Events and Files                               
+  systemd-update-utmp.service        loaded active exited  Update UTMP about System Boot/Shutdown                                       
+  systemd-user-sessions.service      loaded active exited  Permit User Sessions                                                         
+  udisks2.service                    loaded active running Disk Manager                                                                 
+  upower.service                     loaded active running Daemon for power management                                                  
+  user-runtime-dir@1000.service      loaded active exited  User Runtime Directory /run/user/1000                                        
+  user@1000.service                  loaded active running User Manager for UID 1000                                                    
+
+LOAD   = Reflects whether the unit definition was properly loaded.
+ACTIVE = The high-level unit activation state, i.e. generalization of SUB.
+SUB    = The low-level unit activation state, values depend on unit type.
+32 loaded units listed.

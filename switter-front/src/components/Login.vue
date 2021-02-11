@@ -1,63 +1,59 @@
 <template>
   <div id="login">
     <div class="center">
-      <img class="logo" src="../assets/switter-logo.png"></img>
+      <img class="logo" src="./assets/switter-logo.png">
       
       <!-- <h2 class="header">Login to SWITTER </h2> -->
-      <v-form class="form">
-        <v-row >
-          <v-text-field required type="text"  v-model="email" label="E-mail"></v-text-field>
-        </v-row>
-        <v-row >
-          <v-text-field  required type="password" v-model="password" label="Password"></v-text-field>
-        </v-row>
-        <v-row>
-          <v-btn class="btn-login" v-on:click="login">Sign In</v-btn>
-        </v-row>
-        <v-row class="to-register">
+      <b-form class="form">
+        <b-row >
+          <b-form-input  required type="text"  v-model="email" label="E-mail"></b-form-input >
+        </b-row>
+        <b-row >
+          <b-form-input   required type="password" v-model="password" label="Password"></b-form-input >
+        </b-row>
+        <b-row>
+          <b-btn class="btn-login" v-on:click="login" >Sign In</b-btn>
+        </b-row>
+        <b-row class="to-register">
           
-          <router-link class="nav-link-register" to="/register">No Account? Sign Up Right Now!</router-link>
+          <router-link class="nab-link-register" to="/register">No Account? Sign Up Right Now!</router-link>
           
-        </v-row>
-      </v-form>
+        </b-row>
+      </b-form>
     </div>
     
   </div>
 </template>
 
 <script>
-  export default {
+export default {
     name: 'login',
     methods: {
-      login:function(){
-        // let postBody = new URLSearchParams(); 
-        // postBody.append("userEmail", this.email)
-        // postBody.append("userPassword", this.password);
+        login:function(){
         let postBody = {
-          "email": this.email,
-          "password": this.password,
+            "email": this.email,
+            "password": this.password,
         };
-        this.$axios
-          .post(
-            this.$hostname + '/api/auth/login', 
+        this.$http
+            .post('/api/auth/login', 
             postBody,
             {headers:{'Content-Type':'application/json'}}
-          ).then(response=>{
+            ).then(response=>{
             if( response.data != null){
-              if( response.status == 200){
+                if( response.status == 200){
                 console.log("@@@@@ ", response);
                 localStorage.setItem("switterJWT", response.data['jwt']);
                 localStorage.setItem("switterRT", response.data['refresh_token']);
                 this.$router.push({name:'appview'});
-              } else {
+                } else {
                 this.$router.push({name:'register'});
-              }
+                }
 
             }
-          });
-      },
+            });
+        },
     },
-  }
+}
 </script>
 
 <style scoped>
@@ -85,10 +81,10 @@
   margin-left: auto;
   margin-right: auto;
 }
-.nav-link-register{
+.nab-link-register{
   text-decoration-line: none;
 }
-label.v-label.theme--dark {
+label.b-label.theme--dark {
   top: auto;
   margin-top: 5px;
   margin-left: 5px;

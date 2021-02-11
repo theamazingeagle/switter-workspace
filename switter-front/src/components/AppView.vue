@@ -1,70 +1,71 @@
 <template>
-  <div id="appview" >
-  <!-- upper bar---------------------------------------- -->
-  <v-app-bar color="gray accent-8" dense dark fixed >
-      <v-toolbar-title>
-          <router-link class="nav-link-register" to="/">
-            <img class="logo"src='../assets/switter-logo.png' height="48px" width="144px">
-            </img>
-          </router-link>
-      </v-toolbar-title>
-      <v-spacer>
-        <v-btn color="black" id="new-message" v-on:click="newMessageDialog=true">New Message</v-btn>
-      </v-spacer>
-      <v-btn v-if="accessToken" color="gray" id="logout" v-on:click="Logout">Logout</v-btn>
-  </v-app-bar>
-<!-- ------------------------------- -->
-
-  <v-card height="48"></v-card>
-  <div class="content-center" > 
-    <v-card  
-      color="gray accent-2"
-      class="mx-auto msg"
-      width="540"
-      min-height="160"
-      outlined
-      v-for="message in appmessage" :key="message.ID">
-        <div >
-          <div class="msg-title">
-            <img class="avatar" src="../assets/user.png"></img>
-            <div class="msg-username" >{{message['username']}}</div>
-            <div class="msg-date" overline mb-4> {{message['date'] }}</div>
-          </div>
-          <div class="msg-content mb-1">{{message['text']}}</div>
-        </div>
-    </v-card>
-     
-  </div>
-  <!-- end ---------------------------------------- -->
-  <v-dialog 
-    name ="create-message-modal" 
-    v-model="newMessageDialog"
-    max-width=50%
-  >
-    <v-card  class="modal" min-height="160">
-      <div v-if="accessToken"> 
-        <div class="overline mb-4">type your literals</div> 
-        <textarea 
-          class="modal-textarea"
-          v-model="newMessageBody" 
-          autofocus
-        >
-        </textarea>
-        <!-- <div class="overline mb-4" v-if="creatingerror" >error while posting...</div> -->
-        <v-btn v-on:click="CreateMessage">Create</v-btn>
-      </div>
-
-      <div v-else class="modal" >
-        <div class="not-authorized">
-          Not Authorized,
-          <router-link class="nav-link-register" to="/login"> login</router-link>
-          or
-          <router-link class="nav-link-register" to="/register">register</router-link>
-        </div>
-      </div >
-    </v-card>
+  <div class="appview " id="appview" >
+    <!-- upper bar---------------------------------------- -->
     
-  </v-dialog>
+      <nav class="navbar fixed-top navbar-expand-lg">
+          <a class="navbar-brand">
+            <router-link class="nav-link-register" to="/">
+              <img class="logo" src="../assets/switter-logo.png" height="48px" width="144px">
+            </router-link>
+          </a>
+          <ul class="navbar-nav">
+              <li class="nav-item">
+                  <b-button color="black" id="new-message" v-on:click="newMessageDialog=true">New Message</b-button>
+              </li>
+              <li class="nav-item">
+                  <b-button v-if="accessToken" color="gray" id="logout" v-on:click="Logout">Logout</b-button>
+              </li>
+          </ul>
+      </nav>
+   
+  <!-- ------------------------------- -->
+  <main class="container">
+    <div class="thread container">
+      <div class="message container" 
+            color="gray accent-2"    
+            v-for="message in appmessage" :key="message.ID"
+      >
+        <div>
+          <div class="msg-title">
+            <img class="avatar" src="../assets/user.png">
+              <div class="msg-username" >{{message['username']}}</div>
+              <div class="msg-date" overline mb-4> {{message['date'] }}</div>
+            </div>
+            <div class="msg-content mb-1">{{message['text']}}</div>
+          </div>
+      </div>
+    </div>
+  </main>
+      
+    <!-- end ---------------------------------------- -->
+    <!-- <v-dialog 
+      name ="create-message-modal" 
+      v-model="newMessageDialog"
+      max-width=50%
+    >
+      <v-card  class="modal" min-height="160">
+        <div v-if="accessToken"> 
+          <div class="overline mb-4">type your literals</div> 
+          <textarea 
+            class="modal-textarea"
+            v-model="newMessageBody" 
+            autofocus
+          >
+          </textarea>
+          <b-button v-on:click="CreateMessage">Create</b-button>
+        </div>
+
+        <div v-else class="modal" >
+          <div class="not-authorized">
+            Not Authorized,
+            <router-link class="nav-link-register" to="/login"> login</router-link>
+            or
+            <router-link class="nav-link-register" to="/register">register</router-link>
+          </div>
+        </div >
+      </v-card>
+      
+    </v-dialog> -->
 </div>
 
 </template>
@@ -94,7 +95,6 @@ export default {
     selectComponent: function(){return "";}
   },
   created () {
-      this.$vuetify.theme.dark = true;
       window.addEventListener('scroll', this.onScroll);
   },
   destroyed () {
@@ -106,7 +106,7 @@ export default {
   },
   methods:{
     getMessages:function(){
-      this.$axios
+      this.$http
         .get(this.$hostname + '/api/message/all?page='+this.msgListPage,
           {headers:{
             "Authorization":"Bearer "+localStorage.getItem("switterJWT")}}
@@ -128,7 +128,7 @@ export default {
       messageData.Text = this.newMessageBody;
       //messageData.UserID = parseInt(localStorage.getItem("switterUserID") );
       
-      this.$axios
+      this.$http
         .post( this.$hostname + '/api/message/create',
           messageData,
           {headers:{
@@ -151,7 +151,7 @@ export default {
                   "rt":localStorage.getItem("switterRT"),
                 };
 
-            this.$axios
+            this.$http
               .post( this.$hostname + '/api/auth/refresh',
                 message,
                 {
@@ -173,7 +173,7 @@ export default {
                   "jwt":localStorage.getItem("switterJWT"),
                   "rt":localStorage.getItem("switterRT"),
                 };
-                this.$axios
+                this.$http
                   .post( this.$hostname + '/api/auth/logout',
                   message,
                   {
@@ -186,7 +186,7 @@ export default {
         });
     },
     Logout:function(){
-      this.$axios
+      this.$http
         .post( this.$hostname + '/api/auth/logout',
         {
           "jwt":localStorage.getItem("switterJWT"),
@@ -209,68 +209,37 @@ export default {
 
 </script>
 
-<style scoped>
-  .content-center {
-    color:#ffffff;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-  }
-  button {
-    background: #009435;
-    border: 1px solid #009435;
-  }
+<style lang="scss" scoped>
+$app-width: 1360px;
+$thread-block-width: 800px;
 
-  .small-container {
-    max-width: 680px;
-  }
-  .not-authorized{
-    text-align: center;
-    padding: 40px;
-    font-size: 130%;
-  }
-  .logo{
-    width: 150px;
-  }
-  .msg-title{
-    padding-left: 15px;
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid #4a4140 ;
-    background-color: #363636;
-    height: 24px;
-  }
-  .avatar{
-    border-radius: 50%;
-    height: 16px;
-    margin-left,margin-right: 10px;
-  }
-  .msg-date{
-    font-size: 85%;
-    padding: 5px;
-    color: gray;
-  }
-  .msg-content{
-    display: flex;
-    font-size: 150%;
-    margin: 10px;
+.appview {
+    background-color: #110000;
     
+  nav{
+    background-color: #430000;
+    padding:0;
   }
-  .msg-username {
-    font-size: 110%;
-    margin: 10px
+  main {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+    .thread {
+      margin-top: 50px;
+      height: 100%;
+      width: $thread-block-width;
+      .message {
+        background-color: #110000;
+        color: #ffc;
+        margin-top: 5px;
+        padding: 5px;
+      }
+    }
+    .list {
+      background-color: #500000;
+      width: 300px;
+      height: 500px;
+    }
   }
-  .msg{
-    margin: 5px;
-    background-color: #000;
-  }
-  .modal-textarea {
-    width: 100%;
-    height: 240px;
-    background-color: #000;
-    color: #fff;
-    border: solid #343244;
-    resize: none;
-    font-size: 24px;
-  }
+}
 </style>

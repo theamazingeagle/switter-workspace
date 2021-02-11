@@ -25,6 +25,7 @@ var (
 	ErrUserNotFound           = errors.New("User not found")
 	ErrUserNotCreated         = errors.New("User not created")
 	ErrUserNotGet             = errors.New("Failed to get user")
+	ErrPasswordMatch          = errors.New("Password not match")
 	ErrRefreshTokenNotDeleted = errors.New("Refresh token not deleted")
 )
 
@@ -54,10 +55,10 @@ func New(conf AuthConf, storage Storage) *AuthDispatcher {
 func (a *AuthDispatcher) Login(email, password string) (types.AuthInfo, error) {
 	user, exist, err := a.storage.GetUserByEmail(email)
 	if !exist {
-		return types.AuthInfo{}, err
+		return types.AuthInfo{}, ErrUserNotFound
 	}
 	if user.Password != password {
-		return types.AuthInfo{}, fmt.Errorf("Password not match")
+		return types.AuthInfo{}, ErrPasswordMatch
 	}
 	jwt, err := makeJWT(*user, a.conf.JWTSigningKey, a.conf.Exptime)
 	if err != nil {
