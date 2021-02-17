@@ -1,7 +1,7 @@
 <template>
-  <div class="root" >
-    <router-view></router-view>
-  </div>
+  <div class="root"> 
+   <router-view></router-view>
+</div>
 </template>
 
 <script>
@@ -22,14 +22,17 @@ export default {
 
   },
   mounted() {
-    
   },
 }
 </script>
 
 <style>
-.root {
-    padding: 0;
-    margin: 0;
+body {
+  background-color: black;
+  background-image: url(assets/switter-background-1.png);
+  background-size: 20vh;
+  background-repeat: repeat;
+  padding: 0;
+  margin: 0;
 }
 </style>

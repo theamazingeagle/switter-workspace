@@ -1,7 +1,7 @@
 <template>
   <div id="login">
     <div class="center">
-      <img class="logo" src="./assets/switter-logo.png">
+      <img class="logo" src="../assets/switter-logo.png">
       
       <!-- <h2 class="header">Login to SWITTER </h2> -->
       <b-form class="form">

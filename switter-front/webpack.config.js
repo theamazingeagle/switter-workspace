@@ -7,7 +7,10 @@ module.exports = {
     entry: './src/index.js',
     //watch: true,
     devServer: {
-        contentBase: path.join(__dirname, 'dist'),
+        contentBase: [
+            path.join(__dirname, 'dist'),
+            path.join(__dirname, 'assets'),
+          ],
         compress: true,
         hot: true,
         disableHostCheck: true,
@@ -40,16 +43,17 @@ module.exports = {
                   'sass-loader',
                 ]
             },
-            { 
-                test: /\.(png|jpg|gif)$/i,
+            {
+                test: /\.(png|svg|jpg|jpeg|gif)$/i,
                 use: [
                     {
-                        loader: 'url-loader',
-                        options: {
-                            limit: false,
-                        },
+                      loader: 'file-loader',
+                      options: {
+                        name: '[name].[contenthash].[ext]',
+                        esModule: false, // <- here
+                      }
                     },
-                    ],
+                ],
             },         
         ],
     },    

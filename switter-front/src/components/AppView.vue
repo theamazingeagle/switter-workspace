@@ -1,40 +1,26 @@
 <template>
-  <div class="appview " id="appview" >
+  <div class="appview container row" id="appview" >
     <!-- upper bar---------------------------------------- -->
     
-      <nav class="navbar fixed-top navbar-expand-lg">
-          <a class="navbar-brand">
-            <router-link class="nav-link-register" to="/">
-              <img class="logo" src="../assets/switter-logo.png" height="48px" width="144px">
-            </router-link>
-          </a>
-          <ul class="navbar-nav">
-              <li class="nav-item">
-                  <b-button color="black" id="new-message" v-on:click="newMessageDialog=true">New Message</b-button>
-              </li>
-              <li class="nav-item">
-                  <b-button v-if="accessToken" color="gray" id="logout" v-on:click="Logout">Logout</b-button>
-              </li>
-          </ul>
-      </nav>
+  <nav class="container col-3 rounded sticky-top">
+    <a >
+    <router-link  to="/">
+        <img  src="../assets/switter-logo-2.png" height="48px" width="144px">
+    </router-link>
+    </a>
+    <div class="nav-item">
+        <a href="#"  color="black" id="new-message" v-on:click="newMessageDialog=true">New Thread</a>
+    </div>
+    <div class="nav-item">
+        <a href="#"  v-if="accessToken" color="gray" id="logout" v-on:click="Logout">Logout</a>
+    </div>
+      
+  </nav>
    
   <!-- ------------------------------- -->
-  <main class="container">
-    <div class="thread container">
-      <div class="message container" 
-            color="gray accent-2"    
-            v-for="message in appmessage" :key="message.ID"
-      >
-        <div>
-          <div class="msg-title">
-            <img class="avatar" src="../assets/user.png">
-              <div class="msg-username" >{{message['username']}}</div>
-              <div class="msg-date" overline mb-4> {{message['date'] }}</div>
-            </div>
-            <div class="msg-content mb-1">{{message['text']}}</div>
-          </div>
-      </div>
-    </div>
+  <div class="col"></div>
+  <main class="container col-8">
+   <router-view></router-view>
   </main>
       
     <!-- end ---------------------------------------- -->
@@ -210,36 +196,30 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$app-width: 1360px;
-$thread-block-width: 800px;
 
 .appview {
-    background-color: #110000;
-    
+
   nav{
-    background-color: #430000;
-    padding:0;
+    margin: 10px;
+    text-align: center;
+    border-color: #300000;
+    border: 1px solid;
+    background-color: #100000;
+    color: #556677;
+    height: 100%;
+    div{
+        padding: 5px;
+        border-top: 1px gray solid;
+        a{
+            color: #556677;
+            text-decoration: none;
+        }
+    }
   }
   main {
     display: flex;
     justify-content: space-between;
     padding: 5px;
-    .thread {
-      margin-top: 50px;
-      height: 100%;
-      width: $thread-block-width;
-      .message {
-        background-color: #110000;
-        color: #ffc;
-        margin-top: 5px;
-        padding: 5px;
-      }
-    }
-    .list {
-      background-color: #500000;
-      width: 300px;
-      height: 500px;
-    }
   }
 }
 </style>

@@ -20,6 +20,8 @@ import App from './App.vue'
 import Login from './components/Login.vue'
 import Register from './components/Register.vue'
 import AppView from './components/AppView.vue'
+import ThreadView from './components/AppView/ThreadView.vue'
+import ThreadList from './components/AppView/ThreadList.vue'
 
 Vue.prototype.$http = axios;
 Vue.prototype.$hostname = BaseUrl;
@@ -39,6 +41,20 @@ let router = new Router({
       path: '/',
       name:'appview',
       component: AppView,
+      children:[
+        {
+            path:'',
+            component: ThreadList
+        },
+        {
+          path:'thread/:id',
+          component: ThreadView
+        },
+      ],
+    },
+    {
+      path: "*",
+      component: { render: (h) => h("div", ["404! Page Not Found!"]) },
     },
   ]
  });
