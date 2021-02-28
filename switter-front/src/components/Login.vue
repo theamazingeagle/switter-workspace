@@ -1,7 +1,7 @@
 <template>
   <div id="login">
-    <div class="center">
-      <img class="logo" src="../assets/switter-logo.png">
+    <div class="center container">
+      <img class="logo" src="../assets/switter-logo-2.png">
       
       <!-- <h2 class="header">Login to SWITTER </h2> -->
       <b-form class="form">
@@ -30,37 +30,26 @@ export default {
     name: 'login',
     methods: {
         login:function(){
-        let postBody = {
-            "email": this.email,
-            "password": this.password,
-        };
-        this.$http
-            .post('/api/auth/login', 
-            postBody,
-            {headers:{'Content-Type':'application/json'}}
-            ).then(response=>{
-            if( response.data != null){
-                if( response.status == 200){
-                console.log("@@@@@ ", response);
-                localStorage.setItem("switterJWT", response.data['jwt']);
-                localStorage.setItem("switterRT", response.data['refresh_token']);
+            let postBody = {
+                "email": this.email,
+                "password": this.password,
+            };
+            let response = this.$service.Login(postBody);
+            if(response !== null){
+                localStorage.setItem("switterJWT", response['jwt']);
+                localStorage.setItem("switterRT", response['refresh_token']);
                 this.$router.push({name:'appview'});
-                } else {
+            } else {
                 this.$router.push({name:'register'});
-                }
-
             }
-            });
         },
     },
 }
 </script>
 
 <style scoped>
-#login{
-  
+#login {
   align-content: center;
-    
 }
 .header{
   text-align: center;

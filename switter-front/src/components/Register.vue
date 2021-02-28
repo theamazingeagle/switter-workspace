@@ -1,20 +1,20 @@
 <template>
   <div id="register">
+  <div class="auth-error" b-if="authError">Try Again</div>
     <div class="center">
-      <v-img src='assets/switter-logo.png'  ></v-img>
-      <!-- <h2 class="header">register to SWITTER </h2> -->
-      <v-form class="form">
-        <v-row >
-          <v-text-field type="text"  v-model="username" label="Your Name"></v-text-field>
-        </v-row>
-        <v-row >
-          <v-text-field type="text"  v-model="email" label="E-mail"></v-text-field>
-        </v-row>
-        <v-row >
-          <v-text-field type="password" v-model="password" label="Password"></v-text-field>
-        </v-row>
-          <v-btn class="btn-register" v-on:click="register">Sign Up</v-btn>
-      </v-form>
+      <img class="logo" src="../assets/switter-logo-2.png">
+      <b-form class="form">
+        <b-row >
+          <b-form-input type="text"  v-model="username" label="Your Name"></b-form-input>
+        </b-row>
+        <b-row >
+          <b-form-input type="text"  v-model="email" label="E-mail"></b-form-input>
+        </b-row>
+        <b-row >
+          <b-form-input type="password" v-model="password" label="Password"></b-form-input>
+        </b-row>
+          <b-btn class="btn-register" v-on:click="register">Sign Up</b-btn>
+      </b-form>
     </div>
   </div>
 </template>
@@ -24,33 +24,26 @@
     name: 'register',
     methods: {
       register:function(){
-        // let postBody = new URLSearchParams(); 
-        // postBody.append("userName", this.username)
-        // postBody.append("userEmail", this.email)
-        // postBody.append("userPassword", this.password);
         let postBody = {
-          "userName": this.username,
-          "userEmail": this.email,
+          "username": this.username,
+          "email": this.email,
           "password": this.password,
         };
-        this.$http
-          .post(
-            this.$hostname + '/api/auth/register', 
-            postBody,
-            {headers:{'Content-Type':'application/json'}}
-          ).then(response=>{
-            if(response.status == 200) {
-              console.log("------", response.data)
-              localStorage.setItem("switterJWT",  response.data.jwt);
-              localStorage.setItem("switterRT",  response.data.rt);
-              this.$router.push({name:'appview'});
-            }
-            
-          });
+        let response = this.$service.Register(postBody);
+        
+        if(response !== null) {
+            this.authError = false;
+            localStorage.setItem("switterJWT",  response.jwt);
+            localStorage.setItem("switterRT",  response.rt);
+            this.$router.push({name:'appview'});
+        }
+        this.authError = true;
+        
       },
     },
     data: function() {
       return {
+          authError:false,
           email: '',
           password: '',
           username: '',
@@ -67,6 +60,9 @@
 }
 .header{
   text-align: center;
+}
+.logo{
+  width: 100%;
 }
 .center{
   display: block;

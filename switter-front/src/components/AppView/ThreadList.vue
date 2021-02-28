@@ -1,6 +1,5 @@
 <template>
-<div id="threadlist" class="container">
-  
+<div id="threadlist" class="container" >
   <div class="thread rounded" 
           color="gray accent-2"    
           v-for="thread in threads" :key="thread.ID"
@@ -32,15 +31,7 @@ export default {
   },
   methods:{
     getMessages:function(){
-    this.$http
-      .get(this.$hostname + '/api/message/all?page='+this.msgListPage,
-        {headers:{
-          "Authorization":"Bearer "+localStorage.getItem("switterJWT")}}
-        )
-      .then(response => {
-        this.appmessage = this.appmessage.concat(response.data);
-        this.msgListPage = this.appmessage.length;
-      });
+        //this.threads = this.$service.GetThreadsPage();
     },
   },
   props:{
@@ -54,14 +45,15 @@ export default {
 
   },
   mounted() {
-    
+      
+    this.getMessages();
   },
 }
 </script>
 
 <style lang="scss" scoped>
 .thread {
-  background-color: #110000;
+  background-color:#140001;
   border: 1px solid;
   border-color: #aac;
   color: #ffc;
@@ -99,8 +91,8 @@ export default {
   .msg-content {
     padding: 5px;
     border: 1px solid;
-    border-color: #8a0000;
-    background-color: #4d0001;
+    border-color: #2a0000;
+    background-color: #110000;
     font-size: 2em;
   }
 }

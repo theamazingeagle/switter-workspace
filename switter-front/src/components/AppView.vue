@@ -14,9 +14,7 @@
     <div class="nav-item">
         <a href="#"  v-if="accessToken" color="gray" id="logout" v-on:click="Logout">Logout</a>
     </div>
-      
   </nav>
-   
   <!-- ------------------------------- -->
   <div class="col"></div>
   <main class="container col-8">

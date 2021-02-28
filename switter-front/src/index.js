@@ -1,4 +1,4 @@
-import {BaseUrl} from './conf/conf.js'
+import Conf from './conf/conf.js'
 
 import Vue from 'vue'
 
@@ -11,10 +11,10 @@ Vue.use(IconsPlugin)
 
 import Router from 'vue-router'
 Vue.use(Router)
-import axios from 'axios';
-Vue.use(axios);
+// import axios from 'axios';
+// Vue.use(axios);
 
-//import store from './store'
+import Service from './service/service.js'
 
 import App from './App.vue'
 import Login from './components/Login.vue'
@@ -23,8 +23,9 @@ import AppView from './components/AppView.vue'
 import ThreadView from './components/AppView/ThreadView.vue'
 import ThreadList from './components/AppView/ThreadList.vue'
 
-Vue.prototype.$http = axios;
-Vue.prototype.$hostname = BaseUrl;
+//Vue.prototype.$http = axios;
+Vue.prototype.$service = new Service(Conf.BaseUrl);
+Vue.prototype.$hostname = Conf.BaseUrl;
 let router = new Router({
   routes: [
     {
@@ -47,8 +48,9 @@ let router = new Router({
             component: ThreadList
         },
         {
-          path:'thread/:id',
-          component: ThreadView
+          path:'thread/:threadID',
+          component: ThreadView,
+          props: true,
         },
       ],
     },
@@ -63,5 +65,5 @@ let router = new Router({
 new Vue({
   render: h => h(App),
   router,
-  BaseUrl,
+  Conf,
 }).$mount('#appl');

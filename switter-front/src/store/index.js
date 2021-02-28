@@ -2,11 +2,11 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Axios from 'axios';
 
-import Conf from '../conf'
+import Conf from '../conf/conf.js'
 
 Vue.use(Vuex);
 
-export const store = new Vuex.Store({
+export default {Store: new Vuex.Store({
     state:{
         jwt: "",
         refreshToken: "",
@@ -15,7 +15,7 @@ export const store = new Vuex.Store({
     getters: {},
     actions:{
         Login: async (context, payload) => {
-            let data = await Axios.get(Conf.baseUrl + '/api/auth/login');
+            let data = await Axios.get(Conf.BaseUrl + '/api/auth/login');
 
             // .then(response=>{
             //     if( response.data != null){
@@ -36,27 +36,28 @@ export const store = new Vuex.Store({
             context.commit('SetJWT', data);
         },
         Register: async (context, payload) => {
-            let {data} = await Axios.get(Conf.baseUrl + '/api/auth/register');
+            let {data} = await Axios.get(Conf.BaseUrl + '/api/auth/register');
             context.commit('SetJWT', data);
         },
         RefreshToken: async (context, payload) => {
-            let {data} = await Axios.get(Conf.baseUrl + '/api/auth/refresh');
+            let {data} = await Axios.get(Conf.BaseUrl + '/api/auth/refresh');
             context.commit('SetJWT', data);
         },
         Logout: async (context, payload) => {
-            let {data} = await Axios.get(Conf.baseUrl + '/api/auth/logout');
+            let {data} = await Axios.get(Conf.BaseUrl + '/api/auth/logout');
             context.commit('SetJWT', data);
         },
         GetMessagesPage: async (context, payload) => {
-            let {data} = await Axios.get(Conf.baseUrl + '/api/message/getmessagepage');
+            let {data} = await Axios.get(Conf.BaseUrl + '/api/message/getmessagepage');
+            console.log("lololololololololololo");
             context.commit('SetJWT', data);
         },
         CreateMessage: async (context, payload) => {
-            let {data} = await Axios.get(Conf.baseUrl + '/api/message/create');
+            let {data} = await Axios.get(Conf.BaseUrl + '/api/message/create');
             context.commit('SetJWT', data);
         },
         DeleteMessage: async (context, payload) => {
-            let {data} = await Axios.get(Conf.baseUrl + '/api/auth/delete');
+            let {data} = await Axios.get(Conf.BaseUrl + '/api/auth/delete');
             context.commit('SetJWT', data);
         },
     },
@@ -71,4 +72,4 @@ export const store = new Vuex.Store({
             state.refreshToken = payload;
         }
     }
-});
+})};

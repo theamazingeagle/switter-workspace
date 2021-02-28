@@ -18,7 +18,6 @@
     <div class="answer-list container">
       <div
         class="message container rounded"
-        color="gray accent-2"
         v-for="message in appmessage"
         :key="message.ID"
       >
@@ -44,22 +43,25 @@ export default {
   name: "threadview",
   data() {
     return {
-        thread: {"id":6,"text":"This Is Thread","date":"16 Jan 2021 16:37","username":"first","user_id":1},
-        appmessage:[{"id":6,"text":"plane","date":"16 Jan 2021 16:37","username":"first","user_id":1},{"id":5,"text":"birch","date":"16 Jan 2021 16:37","username":"first","user_id":1},{"id":4,"text":"milk","date":"16 Jan 2021 16:37","username":"first","user_id":1},{"id":3,"text":"horse","date":"16 Jan 2021 16:37","username":"first","user_id":1},{"id":2,"text":"death","date":"16 Jan 2021 16:37","username":"first","user_id":1},{"id":1,"text":"first","date":"16 Jan 2021 16:37","username":"first","user_id":1}]
-
+      thread: {"id":6,"text":"This Is Thread","date":"16 Jan 2021 16:37","username":"first","user_id":1},
+      comments:[{"id":6,"text":"plane","date":"16 Jan 2021 16:37","username":"first","user_id":1},{"id":5,"text":"birch","date":"16 Jan 2021 16:37","username":"first","user_id":1},{"id":4,"text":"milk","date":"16 Jan 2021 16:37","username":"first","user_id":1},{"id":3,"text":"horse","date":"16 Jan 2021 16:37","username":"first","user_id":1},{"id":2,"text":"death","date":"16 Jan 2021 16:37","username":"first","user_id":1},{"id":1,"text":"first","date":"16 Jan 2021 16:37","username":"first","user_id":1}]
     };
   },
-  props: {},
+  props: {
+      threadID: Number,
+  },
   components: {},
   computed: {},
   created() {},
-  mounted() {},
+  mounted() {
+      console.log(this.threadID);
+  },
 };
 </script>
 
 <style lang="scss" scoped>
 .thread {
-  background-color: #110000;
+  background-color:#140001;
   border: 1px solid;
   border-color: #aac;
   color: #ffc;
@@ -97,8 +99,8 @@ export default {
   .msg-content {
     padding: 5px;
     border: 1px solid;
-    border-color: #8a0000;
-    background-color: #4d0001;
+    border-color: #2a0000;
+    background-color: #110000;
     font-size: 2em;
   }
 }
@@ -109,9 +111,9 @@ export default {
   margin: 5px;
   height: 100%;
   .message {
-    background-color: #140001;
+    background-color:  #0b0822;
     border: 1px solid;
-    border-color: #280000;
+    border-color: #222222;
     color: #ffc;
     margin-top: 5px;
     padding: 5px;
@@ -141,19 +143,21 @@ export default {
         margin-left:3px;
         margin-right: 3px;
         color: grey;
+        font-weight: 250;
       }
       
     }
     .msg-content {
       padding: 5px;
       border: 1px solid;
-      border-color: #2a0000;
-      background-color: #110000;
+      border-color: #00001d;
+      background-color: #010008;
+      font-weight: 250;
     }
     
   }
   .message:hover{
-    background-color: #250001;
+    background-color: #010012;
   }
 }
 .answer-button{
